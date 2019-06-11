@@ -1,16 +1,16 @@
 {
-  "name": "@octokit/auth-token",
+  "name": "@octokit/auth-oauth-app",
   "publishConfig": {
     "access": "public"
   },
   "version": "0.0.0-development",
-  "description": "Octokit library implementing the token authentication strategy for browsers and Node.js",
+  "description": "OAuth App authentication for JavaScript",
   "main": "index.js",
   "scripts": {
     "build": "pack build",
     "test": "jest --coverage"
   },
-  "repository": "https://github.com/octokit/auth-token.js",
+  "repository": "https://github.com/octokit/auth-oauth-app.js",
   "keywords": [
     "github",
     "octokit",
@@ -20,9 +20,9 @@
   "author": "Gregor Martynus (https://github.com/gr2m)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/octokit/auth-token.js/issues"
+    "url": "https://github.com/octokit/auth-oauth-app.js/issues"
   },
-  "homepage": "https://github.com/octokit/auth-token.js#readme",
+  "homepage": "https://github.com/octokit/auth-oauth-app.js#readme",
   "dependencies": {
     "@octokit/request": "^4.1.0",
     "universal-user-agent": "^2.1.0"
