@@ -2,6 +2,10 @@
 
 > OAuth App authentication for JavaScript
 
+[![@latest](https://img.shields.io/npm/v/@octokit/auth-oauth-app.svg)](https://www.npmjs.com/package/@octokit/auth-oauth-app)
+[![Build Status](https://travis-ci.com/octokit/auth-oauth-app.js.svg?branch=master)](https://travis-ci.com/octokit/auth-oauth-app.js)
+[![Greenkeeper](https://badges.greenkeeper.io/octokit/auth-oauth-app.js.svg)](https://greenkeeper.io/)
+
 `@octokit/auth-oauth-app` is implementing one of [GitHub’s authentication strategies](https://github.com/octokit/auth.js).
 
 It implements authentication using an OAuth app’s client ID and secret. This is meant for the use on servers only: never expose an OAuth client secret on a client such as a web application!
