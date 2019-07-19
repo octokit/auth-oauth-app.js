@@ -4,7 +4,7 @@
     "access": "public"
   },
   "version": "0.0.0-development",
-  "description": "OAuth App authentication for JavaScript",
+  "description": "GitHub OAuth App authentication for JavaScript",
   "scripts": {
     "build": "pack build",
     "test": "jest --coverage"

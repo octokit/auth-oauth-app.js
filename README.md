@@ -1,6 +1,6 @@
 # auth-oauth-app.js
 
-> OAuth App authentication for JavaScript
+> GitHub OAuth App authentication for JavaScript
 
 [![@latest](https://img.shields.io/npm/v/@octokit/auth-oauth-app.svg)](https://www.npmjs.com/package/@octokit/auth-oauth-app)
 [![Build Status](https://travis-ci.com/octokit/auth-oauth-app.js.svg?branch=master)](https://travis-ci.com/octokit/auth-oauth-app.js)
