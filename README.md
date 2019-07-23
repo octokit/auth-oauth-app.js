@@ -8,50 +8,78 @@
 
 `@octokit/auth-oauth-app` is implementing one of [GitHub’s authentication strategies](https://github.com/octokit/auth.js).
 
-It implements authentication using an OAuth app’s client ID and secret. This is meant for the use on servers only: never expose an OAuth client secret on a client such as a web application!
+It implements authentication using an OAuth app’s client ID and secret as well as OAuth access tokens in exchange for a `code` from the [web application flow](https://developer.github.com/apps/building-oauth-apps/authorizing-oauth-apps/#web-application-flow).
 
-Client ID and secret can be passed as URL query parameters (`?client_id=...&client_secret=...`) to get a higher rate limit compared to unauthenticated requests.
-
-The only exceptions are
-
-- [`GET /applications/:client_id/tokens/:access_token`](https://developer.github.com/v3/oauth_authorizations/#check-an-authorization) - Check an authorization
-- [`POST /applications/:client_id/tokens/:access_token`](https://developer.github.com/v3/oauth_authorizations/#reset-an-authorization) - Reset an authorization
-- [`DELETE /applications/:client_id/tokens/:access_token`](https://developer.github.com/v3/oauth_authorizations/#revoke-an-authorization-for-an-application) - Revoke an authorization for an application
-
-For these endpoints, client ID and secret need to be passed as basic authentication in the `Authorization` header. Because of these exception an `options.url` parameter must be passed to the async `auth()` function.
-
-See also: [octokit/oauth-login-url.js](https://github.com/octokit/oauth-login-url.js).
+<!-- toc -->
 
 ## Usage
 
+<table>
+<tbody valign=top align=left>
+<tr><th>
+Browsers
+</th><td width=100%>
+
+Load `@octokit/auth-oauth-app` directly from [cdn.pika.dev](https://cdn.pika.dev)
+
+```html
+<script type="module">
+  import { createOAuthAppAuth } from "https://cdn.pika.dev/@octokit/auth-oauth-app";
+</script>
+```
+
+</td></tr>
+<tr><th>
+Node
+</th><td>
+
+Install with <code>npm install @octokit/auth-oauth-app</code>
+
 ```js
-import { createOAuthAppAuth } from "@octokit/auth-oauth-app";
-import { request } from "@octokit/request";
+const { createOAuthAppAuth } = require("@octokit/auth-oauth-app");
+// or: import { createOAuthAppAuth } from "@octokit/auth-oauth-app";
+```
 
-(async () => {
-  const auth = createOAuthAppAuth({
-    clientId,
-    clientSecret
-  });
+</td></tr>
+</tbody>
+</table>
 
-  // Request private repos for "octokit" org using client ID/secret authentication
-  const appAuthentication = await auth({ url: "/orgs/:org/repos" });
-  const result = await request("GET /orgs/:org/repos", {
-    org: "octokit",
-    type: "private",
-    headers: appAuthentication.headers,
-    ...appAuthentication.query
-  });
+```js
+const auth = createOAuthAppAuth({
+  clientId: "123",
+  clientSecret: "secret",
+  code: "random123", // code from OAuth web flow, see https://git.io/fhd1D
+  state: "mystate123"
+});
 
-  // Request private repos for "octokit" org using OAuth token authentication
-  // "random123" is the authorization code from the web application flow, see below
-  const tokenAuthentication = await auth({ code: "random123" });
-  const result = await request("GET /orgs/:org/repos", {
-    org: "octokit",
-    type: "private",
-    headers: tokenAuthentication.headers
-  });
-})();
+// OAuth Apps authenticate using ?client_id=...&client_secret=... query parameters
+// or Basic auth, depending on the request URL (see implementation details below).
+const appAuthentication = await auth({
+  type: "oauth-app",
+  url: "/orgs/:org/repos"
+});
+// resolves with
+// {
+//   type: 'oauth-app',
+//   clientId: '123',
+//   clientSecret: 'secret',
+//   location: 'query',
+//   query: {
+//     client_id: '123',
+//     client_secret: 'secret'
+//   }
+// }
+
+const tokenAuthentication = await auth({
+  type: "token"
+});
+// resolves with
+// {
+//   type: 'token',
+//   tokenType: 'oauth',
+//   token: '...', /* the created oauth token */
+//   scopes: [] /* depend on request scopes by OAuth app */
+// }
 ```
 
 ## `createOAuthAppAuth(options)`
@@ -93,6 +121,39 @@ The `createOAuthAppAuth` method accepts a single parameter with two keys
       </th>
       <td>
         <strong>Required</strong>. Find your OAuth app’s <code>Client Secret</code> in your account’s developer settings.
+      </td>
+    </tr>
+    <tr>
+      <th>
+        <code>options.code</code>
+      </th>
+      <th>
+        <code>string</code>
+      </th>
+      <td>
+        The authorization <code>code</code> which was passed as query parameter to the callback URL from the <a href="https://developer.github.com/apps/building-oauth-apps/authorizing-oauth-apps/#2-users-are-redirected-back-to-your-site-by-github">OAuth web application flow</a>.
+      </td>
+    </tr>
+    <tr>
+      <th>
+        <code>options.redirectUrl</code>
+      </th>
+      <th>
+        <code>string</code>
+      </th>
+      <td>
+        The URL in your application where users are sent after authorization. See <a href="https://developer.github.com/apps/building-oauth-apps/authorizing-oauth-apps/#redirect-urls">redirect urls</a>.
+      </td>
+    </tr>
+    <tr>
+      <th>
+        <code>options.state</code>
+      </th>
+      <th>
+        <code>string</code>
+      </th>
+      <td>
+        The unguessable random string you provided in Step 1 of the <a href="https://developer.github.com/apps/building-oauth-apps/authorizing-oauth-apps/#2-users-are-redirected-back-to-your-site-by-github">OAuth web application flow</a>.
       </td>
     </tr>
     <tr>
@@ -141,6 +202,17 @@ The async `auth()` method returned by `createOAuthAppAuth(options)` accepts the 
   <tbody align=left valign=top>
     <tr>
       <th>
+        <code>type</code>
+      </th>
+      <th>
+        <code>string</code>
+      </th>
+      <td>
+        Either <code>oauth-app</code> or <code>token</code>. Defaults to <code>oauth-app</code>.
+      </td>
+    </tr>
+    <tr>
+      <th>
         <code>url</code>
       </th>
       <th>
@@ -153,39 +225,6 @@ The async `auth()` method returned by `createOAuthAppAuth(options)` accepts the 
           <li><code>"/applications/1234567890abcdef1234/tokens/secret123"</code></li>
           <li><code>"/applications/:client_id/tokens/:access_token"</code></li>
         </ul>
-      </td>
-    </tr>
-    <tr>
-      <th>
-        <code>code</code>
-      </th>
-      <th>
-        <code>string</code>
-      </th>
-      <td>
-        The authorization <code>code</code> which was passed as query parameter to the callback URL from the <a href="https://developer.github.com/apps/building-oauth-apps/authorizing-oauth-apps/#2-users-are-redirected-back-to-your-site-by-github">OAuth web application flow</a>.
-      </td>
-    </tr>
-    <tr>
-      <th>
-        <code>redirectUrl</code>
-      </th>
-      <th>
-        <code>string</code>
-      </th>
-      <td>
-        The URL in your application where users are sent after authorization. See <a href="https://developer.github.com/apps/building-oauth-apps/authorizing-oauth-apps/#redirect-urls">redirect urls</a>.
-      </td>
-    </tr>
-    <tr>
-      <th>
-        <code>state</code>
-      </th>
-      <th>
-        <code>string</code>
-      </th>
-      <td>
-        The unguessable random string you provided in Step 1 of the <a href="https://developer.github.com/apps/building-oauth-apps/authorizing-oauth-apps/#2-users-are-redirected-back-to-your-site-by-github">OAuth web application flow</a>.
       </td>
     </tr>
   </tbody>
@@ -362,6 +401,47 @@ The async `auth(options)` method to one of two possible authentication objects
     </tr>
   </tbody>
 </table>
+
+## `auth.hook(request, route, parameters)` or `auth.hook(request, options)`
+
+`auth.hook()` hooks directly into the request life cycle. It amends the request to authenticate correctly based on the request URL.
+
+The `request` option is an instance of [`@octokit/request`](https://github.com/octokit/request.js#readme). The `route`/`options` parameters are the same as for the [`request()` method](https://github.com/octokit/request.js#request).
+
+`auth.hook()` can be called directly to send an authenticated request
+
+```js
+const { data: authorizations } = await auth.hook(
+  request,
+  "GET /applications/:client_id/tokens/:access_token"
+);
+```
+
+Or it can be passed as option to [`request()`](https://github.com/octokit/request.js#request).
+
+```js
+const requestWithAuth = request.defaults({
+  request: {
+    hook: auth.hook
+  }
+});
+
+const { data: authorization } = await requestWithAuth("GET /applications/:client_id/tokens/:access_token");
+```
+
+## Implementation details
+
+Client ID and secret can be passed as URL query parameters (`?client_id=...&client_secret=...`) to get a higher rate limit compared to unauthenticated requests. This is meant for the use on servers only: never expose an OAuth client secret on a client such as a web application!
+
+The only exceptions are
+
+- [`GET /applications/:client_id/tokens/:access_token`](https://developer.github.com/v3/oauth_authorizations/#check-an-authorization) - Check an authorization
+- [`POST /applications/:client_id/tokens/:access_token`](https://developer.github.com/v3/oauth_authorizations/#reset-an-authorization) - Reset an authorization
+- [`DELETE /applications/:client_id/tokens/:access_token`](https://developer.github.com/v3/oauth_authorizations/#revoke-an-authorization-for-an-application) - Revoke an authorization for an application
+
+For these endpoints, client ID and secret need to be passed as basic authentication in the `Authorization` header. Because of these exception an `options.url` parameter must be passed to the async `auth()` function if `options.type` is set to `oauth-app`. Additionally, `:client_id` and `:access_token` are defaulted to `options.client` passed to `createOAuthAppAuth(options)` and the token which was created using `options.code`, if passed.
+
+See also: [octokit/oauth-login-url.js](https://github.com/octokit/oauth-login-url.js).
 
 ## License
 
