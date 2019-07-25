@@ -23,7 +23,9 @@
   },
   "homepage": "https://github.com/octokit/auth-oauth-app.js#readme",
   "dependencies": {
-    "@octokit/request": "^5.0.0",
+    "@octokit/request": "^5.0.2",
+    "@types/btoa-lite": "^1.0.0",
+    "btoa-lite": "^1.0.0",
     "universal-user-agent": "^3.0.0"
   },
   "devDependencies": {
@@ -32,7 +34,9 @@
     "@pika/plugin-build-web": "^0.5.1",
     "@pika/plugin-bundle-web": "^0.5.1",
     "@pika/plugin-ts-standard-pkg": "^0.5.1",
+    "@types/fetch-mock": "^7.3.1",
     "@types/jest": "^24.0.13",
+    "fetch-mock": "^7.3.9",
     "jest": "^24.8.0",
     "pika-plugin-unpkg-field": "^1.1.0",
     "semantic-release": "^15.13.12",
