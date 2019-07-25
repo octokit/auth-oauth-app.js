@@ -202,24 +202,24 @@ The async `auth()` method returned by `createOAuthAppAuth(options)` accepts the 
   <tbody align=left valign=top>
     <tr>
       <th>
-        <code>type</code>
+        <code>options.type</code>
       </th>
       <th>
         <code>string</code>
       </th>
       <td>
-        Either <code>oauth-app</code> or <code>token</code>. Defaults to <code>oauth-app</code>.
+        <strong>Required.</strong> Either <code>"oauth-app"</code> or <code>"token"</code>.
       </td>
     </tr>
     <tr>
       <th>
-        <code>url</code>
+        <code>options.url</code>
       </th>
       <th>
         <code>string</code>
       </th>
       <td>
-        An absolute URL or endpoint route path. Examples:
+        <strong>Required if <code>options.type</code> set to <code>"oauth-app"</code>.</strong> An absolute URL or endpoint route path. Examples:
         <ul>
           <li><code>"https://enterprise.github.com/api/v3/applications/1234567890abcdef1234/tokens/secret123"</code></li>
           <li><code>"/applications/1234567890abcdef1234/tokens/secret123"</code></li>
@@ -426,7 +426,9 @@ const requestWithAuth = request.defaults({
   }
 });
 
-const { data: authorization } = await requestWithAuth("GET /applications/:client_id/tokens/:access_token");
+const { data: authorization } = await requestWithAuth(
+  "GET /applications/:client_id/tokens/:access_token"
+);
 ```
 
 ## Implementation details
@@ -439,7 +441,15 @@ The only exceptions are
 - [`POST /applications/:client_id/tokens/:access_token`](https://developer.github.com/v3/oauth_authorizations/#reset-an-authorization) - Reset an authorization
 - [`DELETE /applications/:client_id/tokens/:access_token`](https://developer.github.com/v3/oauth_authorizations/#revoke-an-authorization-for-an-application) - Revoke an authorization for an application
 
-For these endpoints, client ID and secret need to be passed as basic authentication in the `Authorization` header. Because of these exception an `options.url` parameter must be passed to the async `auth()` function if `options.type` is set to `oauth-app`. Additionally, `:client_id` and `:access_token` are defaulted to `options.client` passed to `createOAuthAppAuth(options)` and the token which was created using `options.code`, if passed.
+For these endpoints, client ID and secret need to be passed as basic authentication in the `Authorization` header. Because of these exception an `options.url` parameter must be passed to the async `auth()` function if `options.type` is set to `oauth-app`. Additionally, `:client_id` and `:access_token` are defaulted to `options.clientId` passed to `createOAuthAppAuth(options)` and the token which was created using `options.code`, if passed.
+
+To reset the current access token, you can do this
+
+```js
+await auth.hook(request, "POST /applications/:client_id/tokens/:access_token");
+```
+
+The internally cached token will be replaced and used for succeeding requests. See also ["the REST API documentation"](https://developer.github.com/v3/oauth_authorizations/).
 
 See also: [octokit/oauth-login-url.js](https://github.com/octokit/oauth-login-url.js).
 
