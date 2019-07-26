@@ -12,6 +12,18 @@ It implements authentication using an OAuth app’s client ID and secret as well
 
 <!-- toc -->
 
+- [Usage](#usage)
+- [`createOAuthAppAuth(options)`](#createoauthappauthoptions)
+- [`auth()`](#auth)
+- [Authentication object](#authentication-object)
+    + [OAuth authentication](#oauth-authentication)
+    + [OAuth access token authentication](#oauth-access-token-authentication)
+- [`auth.hook(request, route, parameters)` or `auth.hook(request, options)`](#authhookrequest-route-parameters-or-authhookrequest-options)
+- [Implementation details](#implementation-details)
+- [License](#license)
+
+<!-- tocstop -->
+
 ## Usage
 
 <table>
