@@ -6,7 +6,7 @@
   "version": "0.0.0-development",
   "description": "GitHub OAuth App authentication for JavaScript",
   "scripts": {
-    "build": "pack build",
+    "build": "pika build",
     "test": "jest --coverage"
   },
   "repository": "https://github.com/octokit/auth-oauth-app.js",
@@ -29,7 +29,7 @@
     "universal-user-agent": "^3.0.0"
   },
   "devDependencies": {
-    "@pika/pack": "^0.4.0",
+    "@pika/pack": "^0.5.0",
     "@pika/plugin-build-node": "^0.6.0",
     "@pika/plugin-build-web": "^0.6.0",
     "@pika/plugin-bundle-web": "^0.6.0",
