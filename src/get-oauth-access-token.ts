@@ -17,6 +17,9 @@ export async function getOAuthAccessToken(
 
     const request = customRequest || state.request;
     const { data } = await request(route, {
+      headers: {
+        accept: "application/json"
+      },
       client_id: state.clientId,
       client_secret: state.clientSecret,
       code: state.code,
