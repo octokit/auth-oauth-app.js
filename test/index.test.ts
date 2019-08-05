@@ -35,7 +35,7 @@ test("README example with `auth: 'token'`", async () => {
   ) => {
     expect(url).toEqual("https://github.com/login/oauth/access_token");
     expect(headers).toStrictEqual({
-      accept: "application/vnd.github.v3+json",
+      accept: "application/json",
       "user-agent": "test",
       "content-type": "application/json; charset=utf-8"
     });
@@ -106,7 +106,7 @@ test("`code` with `redirectUrl` and `state`", async () => {
   ) => {
     expect(url).toEqual("https://github.com/login/oauth/access_token");
     expect(headers).toStrictEqual({
-      accept: "application/vnd.github.v3+json",
+      accept: "application/json",
       "user-agent": "test",
       "content-type": "application/json; charset=utf-8"
     });
