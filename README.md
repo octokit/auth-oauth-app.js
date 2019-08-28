@@ -75,7 +75,6 @@ const appAuthentication = await auth({
 //   type: 'oauth-app',
 //   clientId: '123',
 //   clientSecret: 'secret',
-//   location: 'query',
 //   query: {
 //     client_id: '123',
 //     client_secret: 'secret'
@@ -387,28 +386,6 @@ The async `auth(options)` method to one of two possible authentication objects
       </th>
       <td>
         array of scope names enabled for the token
-      </td>
-    </tr>
-    <tr>
-      <th>
-        <code>headers</code>
-      </th>
-      <th>
-        <code>object</code>
-      </th>
-      <td>
-        <code>{ authorization }</code> - value for the "Authorization" header
-      </td>
-    </tr>
-    <tr>
-      <th>
-        <code>query</code>
-      </th>
-      <th>
-        <code>object</code>
-      </th>
-      <td>
-        <code>{}</code> - not used
       </td>
     </tr>
   </tbody>
