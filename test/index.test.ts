@@ -164,7 +164,7 @@ test("test with request instance that has custom baseUrl (GHE)", async () => {
     code: "random123", // code from OAuth web flow, see https://git.io/fhd1D
     state: "mystate123",
     request: request.defaults({
-      baseUrl: "https://github.acme-inc.com",
+      baseUrl: "https://github.acme-inc.com/api/v3",
       request: {
         fetch: fetchMock
           .sandbox()
