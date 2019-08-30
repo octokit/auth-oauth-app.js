@@ -11,9 +11,10 @@ export async function getOAuthAccessToken(
       state.request.endpoint.DEFAULTS.baseUrl
     )
       ? "POST https://github.com/login/oauth/access_token"
-      : `POST ${
-          state.request.endpoint.DEFAULTS.baseUrl
-        }/login/oauth/access_token`;
+      : `POST ${state.request.endpoint.DEFAULTS.baseUrl.replace(
+          "/api/v3",
+          "/login/oauth/access_token"
+        )}`;
 
     const request = customRequest || state.request;
     const { data } = await request(route, {
