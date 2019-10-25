@@ -4,35 +4,34 @@ import { getOAuthAccessToken } from "./get-oauth-access-token";
 import { requiresBasicAuth } from "./requires-basic-auth";
 import {
   AnyResponse,
-  Defaults,
-  Endpoint,
-  Parameters,
-  Request,
+  EndpointOptions,
+  RequestParameters,
+  RequestInterface,
   Route,
   State
 } from "./types";
 
 export async function hook(
   state: State,
-  request: Request,
-  route: Route | Endpoint,
-  parameters?: Parameters
+  request: RequestInterface,
+  route: Route | EndpointOptions,
+  parameters?: RequestParameters
 ): Promise<AnyResponse> {
-  let endpoint: Defaults = request.endpoint.merge(route as string, parameters);
+  let endpoint = request.endpoint.merge(route as string, parameters);
 
   const { token } = await getOAuthAccessToken(state, request);
 
   if (!requiresBasicAuth(endpoint.url)) {
     endpoint.headers.authorization = `token ${token}`;
 
-    return request(endpoint as Endpoint);
+    return request(endpoint as EndpointOptions);
   }
 
   const credentials = btoa(`${state.clientId}:${state.clientSecret}`);
   endpoint.headers.authorization = `basic ${credentials}`;
 
   // default `:client_id` & `:access_token` URL parameters
-  if (/:client_id/.test(endpoint.url)) {
+  if (endpoint.url && /:client_id/.test(endpoint.url)) {
     endpoint = Object.assign(
       {
         client_id: state.clientId,
@@ -42,7 +41,7 @@ export async function hook(
     );
   }
 
-  const response = await request(endpoint as Endpoint);
+  const response = await request(endpoint as EndpointOptions);
 
   // `POST /applications/:client_id/tokens/:access_token` resets the passed token
   // and returns a new one. If that’s the current request then update internal state.

@@ -1,8 +1,8 @@
-import { Request, State, TokenWithScopes } from "./types";
+import { RequestInterface, State, TokenWithScopes } from "./types";
 
 export async function getOAuthAccessToken(
   state: State,
-  customRequest?: Request
+  customRequest?: RequestInterface
 ): Promise<TokenWithScopes> {
   if (!state.token) {
     // The "/login/oauth/access_token" is not part of the REST API hosted on api.github.com,

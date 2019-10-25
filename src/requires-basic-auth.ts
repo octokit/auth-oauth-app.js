@@ -7,6 +7,6 @@
  */
 const OAUTH_ROUTES_EXCEPTIONS_REGEX = /\/applications\/:?[\w_]+\/tokens\/:?[\w_]+($|\?)/;
 
-export function requiresBasicAuth(url: string) {
-  return OAUTH_ROUTES_EXCEPTIONS_REGEX.test(url);
+export function requiresBasicAuth(url: string | undefined) {
+  return url && OAUTH_ROUTES_EXCEPTIONS_REGEX.test(url);
 }
