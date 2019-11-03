@@ -1,11 +1,13 @@
-import { request } from "@octokit/request";
 import btoa from "btoa-lite";
 
 import { getOAuthAccessToken } from "./get-oauth-access-token";
 import { requiresBasicAuth } from "./requires-basic-auth";
-import { State, AuthOptions } from "./types";
+import { State, AuthOptions, Authentication } from "./types";
 
-export async function auth(state: State, authOptions: AuthOptions) {
+export async function auth(
+  state: State,
+  authOptions: AuthOptions
+): Promise<Authentication> {
   if (authOptions.type === "token") {
     const { token, scopes } = await getOAuthAccessToken(state);
 
