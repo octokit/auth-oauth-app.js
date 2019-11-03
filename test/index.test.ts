@@ -352,3 +352,35 @@ test("auth.hook(request, 'POST /applications/:client_id/tokens/:access_token') r
   const response2 = await requestWithAuth("GET /user");
   expect(response2.data).toStrictEqual({ id: 123 });
 });
+
+test("oauth endpoint error", async () => {
+  const requestMock = request.defaults({
+    headers: {
+      "user-agent": "test"
+    },
+    request: {
+      fetch: fetchMock.sandbox().post(
+        "https://github.com/login/oauth/access_token", {
+          status: 200,
+          body: JSON.stringify({
+            error: "incorrect_client_credentials",
+            error_description: "The client_id and/or client_secret passed are incorrect.",
+          }),
+          headers: {
+            "Content-Type": "application/json; charset=utf-8"
+          }
+        }),
+    },
+  });
+
+  const auth = createOAuthAppAuth({
+    clientId: "12345678901234567890",
+    clientSecret: "1234567890123456789012345678901234567890",
+    code: "12345678901234567890",
+    request: requestMock,
+  });
+
+  await expect(
+    auth({ type: 'token' })
+  ).rejects.toThrow('incorrect_client_credentials');
+});
