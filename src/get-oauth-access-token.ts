@@ -1,4 +1,5 @@
 import { RequestInterface, State, TokenWithScopes } from "./types";
+import { RequestError } from "@octokit/request-error";
 
 export async function getOAuthAccessToken(
   state: State,
@@ -17,7 +18,8 @@ export async function getOAuthAccessToken(
         )}`;
 
     const request = customRequest || state.request;
-    const { data } = await request(route, {
+
+    const parameters = {
       headers: {
         accept: "application/json"
       },
@@ -26,7 +28,18 @@ export async function getOAuthAccessToken(
       code: state.code,
       redirect_uri: state.redirectUrl,
       state: state.state
-    });
+    };
+
+    const response = await request(route, parameters);
+
+    if (response.data.error !== undefined) {
+      throw new RequestError(`${response.data.error_description} (${response.data.error})`, response.status, {
+        headers: response.headers,
+        request: request.endpoint(route, parameters)
+      });
+    }
+
+    const { data } = response;
 
     state.token = {
       token: data.access_token,
