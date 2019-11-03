@@ -3,8 +3,14 @@ import { request } from "@octokit/request";
 
 import { auth } from "./auth";
 import { hook } from "./hook";
-import { StrategyOptions } from "./types";
+import { StrategyOptions, AuthOptions, Authentication } from "./types";
 import { VERSION } from "./version";
+
+export type Types = {
+  StrategyOptions: StrategyOptions;
+  AuthOptions: AuthOptions;
+  Authentication: Authentication;
+};
 
 export function createOAuthAppAuth(options: StrategyOptions) {
   const state = Object.assign(
