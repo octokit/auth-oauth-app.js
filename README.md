@@ -3,7 +3,7 @@
 > GitHub OAuth App authentication for JavaScript
 
 [![@latest](https://img.shields.io/npm/v/@octokit/auth-oauth-app.svg)](https://www.npmjs.com/package/@octokit/auth-oauth-app)
-[![Build Status](https://travis-ci.com/octokit/auth-oauth-app.js.svg?branch=master)](https://travis-ci.com/octokit/auth-oauth-app.js)
+[![Build Status](https://github.com/octokit/auth-oauth-app.js/workflows/Test/badge.svg)](https://github.com/octokit/auth-oauth-app.js/actions?query=workflow%3ATest)
 [![Greenkeeper](https://badges.greenkeeper.io/octokit/auth-oauth-app.js.svg)](https://greenkeeper.io/)
 
 `@octokit/auth-oauth-app` is implementing one of [GitHub’s authentication strategies](https://github.com/octokit/auth.js).
