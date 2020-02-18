@@ -29,43 +29,46 @@ test("README example with `url`", async () => {
 });
 
 test("README example with `auth: 'token'`", async () => {
-  const matchCreateAccessToken: MockMatcherFunction = (
-    url,
-    { body, headers }
-  ) => {
-    expect(url).toEqual("https://github.com/login/oauth/access_token");
-    expect(headers).toStrictEqual({
-      accept: "application/json",
-      "user-agent": "test",
-      "content-type": "application/json; charset=utf-8"
-    });
-    return true;
-  };
-
-  const createAccessTokenResponseData = {
-    access_token: "secret123",
-    scope: "",
-    token_type: "bearer"
-  };
+  const mock = fetchMock.sandbox().postOnce(
+    "https://github.com/login/oauth/access_token",
+    {
+      access_token: "secret123",
+      scope: "",
+      token_type: "bearer"
+    },
+    {
+      headers: {
+        accept: "application/json",
+        "user-agent": "test",
+        "content-type": "application/json; charset=utf-8"
+      },
+      body: {
+        client_id: "123",
+        client_secret: "secret",
+        code: "random123",
+        state: "mystate123"
+      }
+    }
+  );
 
   const auth = createOAuthAppAuth({
     clientId: "123",
     clientSecret: "secret",
-    code: "random123", // code from OAuth web flow, see https://git.io/fhd1D
-    state: "mystate123",
     request: request.defaults({
       headers: {
         "user-agent": "test"
       },
       request: {
-        fetch: fetchMock
-          .sandbox()
-          .postOnce(matchCreateAccessToken, createAccessTokenResponseData)
+        fetch: mock
       }
     })
   });
 
-  const authentication = await auth({ type: "token" });
+  const authentication = await auth({
+    type: "token",
+    code: "random123",
+    state: "mystate123"
+  });
 
   expect(authentication).toEqual({
     type: "token",
@@ -287,7 +290,9 @@ test("auth.hook defaults URL parameters for '/applications/:client_id/tokens/:ac
   const { data: data1 } = await requestWithAuth(
     "GET /applications/:client_id/tokens/:access_token"
   );
-  const { data: data2 } = await requestWithAuth(
+  const {
+    data: data2
+  } = await requestWithAuth(
     "GET /applications/:client_id/tokens/:access_token",
     { access_token: "othersecret" }
   );
@@ -359,28 +364,30 @@ test("oauth endpoint error", async () => {
       "user-agent": "test"
     },
     request: {
-      fetch: fetchMock.sandbox().post(
-        "https://github.com/login/oauth/access_token", {
+      fetch: fetchMock
+        .sandbox()
+        .post("https://github.com/login/oauth/access_token", {
           status: 200,
           body: JSON.stringify({
             error: "incorrect_client_credentials",
-            error_description: "The client_id and/or client_secret passed are incorrect.",
+            error_description:
+              "The client_id and/or client_secret passed are incorrect."
           }),
           headers: {
             "Content-Type": "application/json; charset=utf-8"
           }
-        }),
-    },
+        })
+    }
   });
 
   const auth = createOAuthAppAuth({
     clientId: "12345678901234567890",
     clientSecret: "1234567890123456789012345678901234567890",
     code: "12345678901234567890",
-    request: requestMock,
+    request: requestMock
   });
 
-  await expect(
-    auth({ type: 'token' })
-  ).rejects.toThrow('incorrect_client_credentials');
+  await expect(auth({ type: "token" })).rejects.toThrow(
+    "incorrect_client_credentials"
+  );
 });
