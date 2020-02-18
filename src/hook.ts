@@ -19,6 +19,11 @@ export async function hook(
 ): Promise<AnyResponse> {
   let endpoint = request.endpoint.merge(route as string, parameters);
 
+  // Do not intercept request to retrieve a new token
+  if (/\/login\/oauth\/access_token$/.test(endpoint.url as string)) {
+    return request(endpoint as EndpointOptions);
+  }
+
   const { token } = await getOAuthAccessToken(state, { request });
 
   if (!requiresBasicAuth(endpoint.url)) {
