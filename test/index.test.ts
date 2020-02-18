@@ -367,6 +367,36 @@ test("auth.hook defaults URL parameters for '/applications/:client_id/tokens/:ac
   expect(data3.id).toBe(789);
 });
 
+test("auth.hook(request, 'POST https://github.com/login/oauth/access_token') does not send request twice (#35)", async () => {
+  const mock = fetchMock
+    .sandbox()
+    .postOnce("https://github.com/login/oauth/access_token", {
+      access_token: "secret123",
+      scope: ""
+    });
+
+  const auth = createOAuthAppAuth({
+    clientId: "123",
+    clientSecret: "secret"
+  });
+
+  const requestWithAuth = request.defaults({
+    request: {
+      fetch: mock,
+      hook: auth.hook
+    }
+  });
+
+  await requestWithAuth("POST https://github.com/login/oauth/access_token", {
+    headers: {
+      accept: "application/json"
+    },
+    type: "token",
+    code: "random123",
+    state: "mystate123"
+  });
+});
+
 test("auth.hook(request, 'POST /applications/:client_id/tokens/:access_token') resets the used token", async () => {
   const mock = fetchMock
     .sandbox()
