@@ -78,7 +78,55 @@ test("README example with `auth: 'token'`", async () => {
   });
 });
 
-test('`url` is "/applications/:client_id/tokens/:access_token"', async () => {
+test('`url` is "/applications/:client_id/token"', async () => {
+  const auth = createOAuthAppAuth({
+    clientId: "123",
+    clientSecret: "secret",
+    code: "random123",
+    state: "mystate123"
+  });
+
+  const authentication = await auth({
+    type: "oauth-app",
+    url: "/applications/:client_id/token"
+  });
+
+  expect(authentication).toEqual({
+    type: "oauth-app",
+    clientId: "123",
+    clientSecret: "secret",
+    headers: {
+      authorization: "basic MTIzOnNlY3JldA==" // btoa('123:secret')
+    },
+    query: {}
+  });
+});
+
+test('`url` is "/applications/:client_id/grant"', async () => {
+  const auth = createOAuthAppAuth({
+    clientId: "123",
+    clientSecret: "secret",
+    code: "random123",
+    state: "mystate123"
+  });
+
+  const authentication = await auth({
+    type: "oauth-app",
+    url: "/applications/:client_id/grant"
+  });
+
+  expect(authentication).toEqual({
+    type: "oauth-app",
+    clientId: "123",
+    clientSecret: "secret",
+    headers: {
+      authorization: "basic MTIzOnNlY3JldA==" // btoa('123:secret')
+    },
+    query: {}
+  });
+});
+
+test('`url` is "/applications/:client_id/tokens/:access_token" (deprecated)', async () => {
   const auth = createOAuthAppAuth({
     clientId: "123",
     clientSecret: "secret",
