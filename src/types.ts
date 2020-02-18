@@ -24,8 +24,14 @@ type AuthAppOptions = {
   type: "oauth-app";
   url: string;
 };
+export type AuthTokenOptions = {
+  type: "token";
+  code?: string;
+  redirectUrl?: string;
+  state?: string;
+};
 
-export type AuthOptions = AuthAppOptions | { type: "token" };
+export type AuthOptions = AuthAppOptions | AuthTokenOptions;
 
 export type TokenWithScopes = {
   token: string;

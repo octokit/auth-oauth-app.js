@@ -19,7 +19,7 @@ export async function hook(
 ): Promise<AnyResponse> {
   let endpoint = request.endpoint.merge(route as string, parameters);
 
-  const { token } = await getOAuthAccessToken(state, request);
+  const { token } = await getOAuthAccessToken(state, { request });
 
   if (!requiresBasicAuth(endpoint.url)) {
     endpoint.headers.authorization = `token ${token}`;

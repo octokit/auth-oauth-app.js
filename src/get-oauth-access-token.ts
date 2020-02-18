@@ -1,51 +1,78 @@
-import { RequestInterface, State, TokenWithScopes } from "./types";
 import { RequestError } from "@octokit/request-error";
+
+import {
+  AuthTokenOptions,
+  RequestInterface,
+  State,
+  TokenWithScopes
+} from "./types";
 
 export async function getOAuthAccessToken(
   state: State,
-  customRequest?: RequestInterface
+  options?: {
+    request?: RequestInterface;
+    auth?: AuthTokenOptions;
+  }
 ): Promise<TokenWithScopes> {
-  if (!state.token) {
-    // The "/login/oauth/access_token" is not part of the REST API hosted on api.github.com,
-    // instead it’s using the github.com domain.
-    const route = /^https:\/\/(api\.)?github\.com$/.test(
-      state.request.endpoint.DEFAULTS.baseUrl
-    )
-      ? "POST https://github.com/login/oauth/access_token"
-      : `POST ${state.request.endpoint.DEFAULTS.baseUrl.replace(
-          "/api/v3",
-          "/login/oauth/access_token"
-        )}`;
+  /* istanbul ignore next: coverage probles with optional chaning */
+  const authOptionsPassed = typeof options?.auth?.code !== "undefined";
+  const authOptions = authOptionsPassed
+    ? /* istanbul ignore next: coverage probles with optional chaning */
+      (options?.auth as AuthTokenOptions)
+    : state;
 
-    const request = customRequest || state.request;
-
-    const parameters = {
-      headers: {
-        accept: "application/json"
-      },
-      client_id: state.clientId,
-      client_secret: state.clientSecret,
-      code: state.code,
-      redirect_uri: state.redirectUrl,
-      state: state.state
-    };
-
-    const response = await request(route, parameters);
-
-    if (response.data.error !== undefined) {
-      throw new RequestError(`${response.data.error_description} (${response.data.error})`, response.status, {
-        headers: response.headers,
-        request: request.endpoint(route, parameters)
-      });
-    }
-
-    const { data } = response;
-
-    state.token = {
-      token: data.access_token,
-      scopes: data.scope.split(/,\s*/).filter(Boolean)
-    };
+  if (state.token && !authOptionsPassed) {
+    return state.token;
   }
 
-  return state.token;
+  // The "/login/oauth/access_token" is not part of the REST API hosted on api.github.com,
+  // instead it’s using the github.com domain.
+  const route = /^https:\/\/(api\.)?github\.com$/.test(
+    state.request.endpoint.DEFAULTS.baseUrl
+  )
+    ? "POST https://github.com/login/oauth/access_token"
+    : `POST ${state.request.endpoint.DEFAULTS.baseUrl.replace(
+        "/api/v3",
+        "/login/oauth/access_token"
+      )}`;
+
+  /* istanbul ignore next: coverage probles with optional chaning */
+  const request = options?.request || state.request;
+
+  const parameters = {
+    headers: {
+      accept: "application/json"
+    },
+    client_id: state.clientId,
+    client_secret: state.clientSecret,
+    code: authOptions.code,
+    redirect_uri: authOptions.redirectUrl,
+    state: authOptions.state
+  };
+
+  const response = await request(route, parameters);
+
+  if (response.data.error !== undefined) {
+    throw new RequestError(
+      `${response.data.error_description} (${response.data.error})`,
+      response.status,
+      {
+        headers: response.headers,
+        request: request.endpoint(route, parameters)
+      }
+    );
+  }
+
+  const { data } = response;
+
+  const newToken = {
+    token: data.access_token,
+    scopes: data.scope.split(/,\s*/).filter(Boolean)
+  };
+
+  if (!authOptionsPassed) {
+    state.token = newToken;
+  }
+
+  return newToken;
 }

@@ -9,7 +9,9 @@ export async function auth(
   authOptions: AuthOptions
 ): Promise<Authentication> {
   if (authOptions.type === "token") {
-    const { token, scopes } = await getOAuthAccessToken(state);
+    const { token, scopes } = await getOAuthAccessToken(state, {
+      auth: authOptions
+    });
 
     return {
       type: "token",
