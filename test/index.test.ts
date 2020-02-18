@@ -7,7 +7,7 @@ test("README example with `url`", async () => {
   const auth = createOAuthAppAuth({
     clientId: "123",
     clientSecret: "secret",
-    code: "random123", // code from OAuth web flow, see https://git.io/fhd1D
+    code: "random123",
     state: "mystate123"
   });
 
@@ -82,7 +82,7 @@ test('`url` is "/applications/:client_id/tokens/:access_token"', async () => {
   const auth = createOAuthAppAuth({
     clientId: "123",
     clientSecret: "secret",
-    code: "random123", // code from OAuth web flow, see https://git.io/fhd1D
+    code: "random123",
     state: "mystate123"
   });
 
@@ -102,7 +102,7 @@ test('`url` is "/applications/:client_id/tokens/:access_token"', async () => {
   });
 });
 
-test("`code` with `redirectUrl` and `state`", async () => {
+test("`code`, `redirectUrl`, `state` set as strategyOptions", async () => {
   const matchCreateAccessToken: MockMatcherFunction = (
     url,
     { body, headers }
@@ -133,7 +133,7 @@ test("`code` with `redirectUrl` and `state`", async () => {
   const auth = createOAuthAppAuth({
     clientId: "123",
     clientSecret: "secret",
-    code: "random123", // code from OAuth web flow, see https://git.io/fhd1D
+    code: "random123",
     state: "mystate123",
     redirectUrl: "https://example.com/login",
     request: request.defaults({
@@ -160,11 +160,72 @@ test("`code` with `redirectUrl` and `state`", async () => {
   });
 });
 
+test("`code`, `redirectUrl`, `state` set as both strategyOptions and authOptions", async () => {
+  const matchCreateAccessToken: MockMatcherFunction = (
+    url,
+    { body, headers }
+  ) => {
+    expect(url).toEqual("https://github.com/login/oauth/access_token");
+    expect(headers).toStrictEqual({
+      accept: "application/json",
+      "user-agent": "test",
+      "content-type": "application/json; charset=utf-8"
+    });
+    expect(JSON.parse(String(body))).toStrictEqual({
+      client_id: "123",
+      client_secret: "secret",
+      code: "random123",
+      redirect_uri: "https://example.com/login",
+      state: "mystate123"
+    });
+
+    return true;
+  };
+
+  const createAccessTokenResponseData = {
+    access_token: "secret123",
+    scope: "",
+    token_type: "bearer"
+  };
+
+  const auth = createOAuthAppAuth({
+    clientId: "123",
+    clientSecret: "secret",
+    code: "strategyrandom123",
+    state: "strategymystate123",
+    redirectUrl: "https://example.com/loginstrategy",
+    request: request.defaults({
+      headers: {
+        "user-agent": "test"
+      },
+      request: {
+        fetch: fetchMock
+          .sandbox()
+          .postOnce(matchCreateAccessToken, createAccessTokenResponseData)
+      }
+    })
+  });
+
+  const authentication = await auth({
+    type: "token",
+    code: "random123",
+    state: "mystate123",
+    redirectUrl: "https://example.com/login"
+  });
+
+  expect(authentication).toEqual({
+    type: "token",
+    token: "secret123",
+    tokenType: "oauth",
+    scopes: []
+  });
+});
+
 test("test with request instance that has custom baseUrl (GHE)", async () => {
   const auth = createOAuthAppAuth({
     clientId: "123",
     clientSecret: "secret",
-    code: "random123", // code from OAuth web flow, see https://git.io/fhd1D
+    code: "random123",
     state: "mystate123",
     request: request.defaults({
       baseUrl: "https://github.acme-inc.com/api/v3",
@@ -210,7 +271,7 @@ test("auth.hook() creates token and uses it for succeeding requests", async () =
   const auth = createOAuthAppAuth({
     clientId: "123",
     clientSecret: "secret",
-    code: "random123", // code from OAuth web flow, see https://git.io/fhd1D
+    code: "random123",
     state: "mystate123"
   });
 
@@ -272,7 +333,7 @@ test("auth.hook defaults URL parameters for '/applications/:client_id/tokens/:ac
   const auth = createOAuthAppAuth({
     clientId: "123",
     clientSecret: "secret",
-    code: "random123", // code from OAuth web flow, see https://git.io/fhd1D
+    code: "random123",
     state: "mystate123"
   });
 
@@ -339,7 +400,7 @@ test("auth.hook(request, 'POST /applications/:client_id/tokens/:access_token') r
   const auth = createOAuthAppAuth({
     clientId: "123",
     clientSecret: "secret",
-    code: "random123", // code from OAuth web flow, see https://git.io/fhd1D
+    code: "random123",
     state: "mystate123"
   });
 
