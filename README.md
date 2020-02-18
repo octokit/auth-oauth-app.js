@@ -16,8 +16,8 @@ It implements authentication using an OAuth app’s client ID and secret as well
 - [`createOAuthAppAuth(options)`](#createoauthappauthoptions)
 - [`auth()`](#auth)
 - [Authentication object](#authentication-object)
-    - [OAuth authentication](#oauth-authentication)
-    - [OAuth access token authentication](#oauth-access-token-authentication)
+  - [OAuth authentication](#oauth-authentication)
+  - [OAuth access token authentication](#oauth-access-token-authentication)
 - [`auth.hook(request, route, parameters)` or `auth.hook(request, options)`](#authhookrequest-route-parameters-or-authhookrequest-options)
 - [Implementation details](#implementation-details)
 - [License](#license)
@@ -59,9 +59,7 @@ const { createOAuthAppAuth } = require("@octokit/auth-oauth-app");
 ```js
 const auth = createOAuthAppAuth({
   clientId: "123",
-  clientSecret: "secret",
-  code: "random123", // code from OAuth web flow, see https://git.io/fhd1D
-  state: "mystate123"
+  clientSecret: "secret"
 });
 
 // OAuth Apps authenticate using ?client_id=...&client_secret=... query parameters
@@ -82,7 +80,9 @@ const appAuthentication = await auth({
 // }
 
 const tokenAuthentication = await auth({
-  type: "token"
+  type: "token",
+  code: "random123", // code from OAuth web flow, see https://git.io/fhd1D
+  state: "mystate123"
 });
 // resolves with
 // {
@@ -236,6 +236,39 @@ The async `auth()` method returned by `createOAuthAppAuth(options)` accepts the 
           <li><code>"/applications/1234567890abcdef1234/tokens/secret123"</code></li>
           <li><code>"/applications/:client_id/tokens/:access_token"</code></li>
         </ul>
+      </td>
+    </tr>
+    <tr>
+      <th>
+        <code>options.code</code>
+      </th>
+      <th>
+        <code>string</code>
+      </th>
+      <td>
+        Only relevant if <code>options.type</code> is set to <code>"token"</code>. The authorization <code>code</code> which was passed as query parameter to the callback URL from the <a href="https://developer.github.com/apps/building-oauth-apps/authorizing-oauth-apps/#2-users-are-redirected-back-to-your-site-by-github">OAuth web application flow</a>. Defaults to what was set in the strategy options.
+      </td>
+    </tr>
+    <tr>
+      <th>
+        <code>options.redirectUrl</code>
+      </th>
+      <th>
+        <code>string</code>
+      </th>
+      <td>
+        Only relevant if <code>options.type</code> is set to <code>"token"</code>. The URL in your application where users are sent after authorization. See <a href="https://developer.github.com/apps/building-oauth-apps/authorizing-oauth-apps/#redirect-urls">redirect urls</a>. Defaults to what was set in the strategy options.
+      </td>
+    </tr>
+    <tr>
+      <th>
+        <code>options.state</code>
+      </th>
+      <th>
+        <code>string</code>
+      </th>
+      <td>
+        Only relevant if <code>options.type</code> is set to <code>"token"</code>. The unguessable random string you provided in Step 1 of the <a href="https://developer.github.com/apps/building-oauth-apps/authorizing-oauth-apps/#2-users-are-redirected-back-to-your-site-by-github">OAuth web application flow</a>. Defaults to what was set in the strategy options.
       </td>
     </tr>
   </tbody>
