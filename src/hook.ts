@@ -10,6 +10,7 @@ import {
   Route,
   State
 } from "./types";
+import { EndpointDefaults } from "@octokit/types";
 
 export async function hook(
   state: State,
@@ -17,46 +18,46 @@ export async function hook(
   route: Route | EndpointOptions,
   parameters?: RequestParameters
 ): Promise<AnyResponse> {
-  let endpoint = request.endpoint.merge(route as string, parameters);
+  let endpoint = request.endpoint.merge(
+    route as string,
+    parameters
+  ) as EndpointDefaults & { url: string };
 
   // Do not intercept request to retrieve a new token
   if (/\/login\/oauth\/access_token$/.test(endpoint.url as string)) {
-    return request(endpoint as EndpointOptions);
+    return request(endpoint);
+  }
+
+  if (requiresBasicAuth(endpoint.url)) {
+    const credentials = btoa(`${state.clientId}:${state.clientSecret}`);
+    endpoint.headers.authorization = `basic ${credentials}`;
+
+    const response = await request(endpoint);
+
+    const parsedEndpoint = request.endpoint.parse(endpoint);
+    // `POST /applications/:client_id/tokens/:access_token` (legacy) or
+    // `PATCH /applications/:client_id/token` resets the passed token
+    // and returns a new one. If that’s the current request then update internal state.
+    const isLegacyTokenResetRequest =
+      endpoint.method === "POST" &&
+      /^\/applications\/:?[\w_]+\/tokens\/:?[\w_]+$/.test(endpoint.url);
+    const isTokenResetRequest =
+      endpoint.method === "PATCH" &&
+      /^\/applications\/:?[\w_]+\/token$/.test(endpoint.url);
+
+    if (isLegacyTokenResetRequest || isTokenResetRequest) {
+      state.token = {
+        token: response.data.token,
+        // @ts-ignore figure this out
+        scope: response.data.scopes
+      };
+    }
+
+    return response;
   }
 
   const { token } = await getOAuthAccessToken(state, { request });
+  endpoint.headers.authorization = `token ${token}`;
 
-  if (!requiresBasicAuth(endpoint.url)) {
-    endpoint.headers.authorization = `token ${token}`;
-
-    return request(endpoint as EndpointOptions);
-  }
-
-  const credentials = btoa(`${state.clientId}:${state.clientSecret}`);
-  endpoint.headers.authorization = `basic ${credentials}`;
-
-  // default `:client_id` & `:access_token` URL parameters
-  if (endpoint.url && /:client_id/.test(endpoint.url)) {
-    endpoint = Object.assign(
-      {
-        client_id: state.clientId,
-        access_token: token
-      },
-      endpoint
-    );
-  }
-
-  const response = await request(endpoint as EndpointOptions);
-
-  // `POST /applications/:client_id/tokens/:access_token` resets the passed token
-  // and returns a new one. If that’s the current request then update internal state.
-  const parsedEndpoint = request.endpoint.parse(endpoint);
-  const isTokenResetRequest =
-    parsedEndpoint.method === "POST" &&
-    new RegExp(token).test(parsedEndpoint.url);
-  if (isTokenResetRequest && state.token) {
-    state.token.token = response.data.token;
-  }
-
-  return response;
+  return request(endpoint as EndpointOptions);
 }

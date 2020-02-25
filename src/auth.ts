@@ -21,28 +21,12 @@ export async function auth(
     };
   }
 
-  const [headers, query] = requiresBasicAuth(authOptions.url)
-    ? [
-        {
-          authorization: `basic ${btoa(
-            `${state.clientId}:${state.clientSecret}`
-          )}`
-        },
-        {}
-      ]
-    : [
-        {},
-        {
-          client_id: state.clientId,
-          client_secret: state.clientSecret
-        }
-      ];
-
   return {
     type: "oauth-app",
     clientId: state.clientId,
     clientSecret: state.clientSecret,
-    headers,
-    query
+    headers: {
+      authorization: `basic ${btoa(`${state.clientId}:${state.clientSecret}`)}`
+    }
   };
 }

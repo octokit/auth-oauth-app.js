@@ -16,8 +16,8 @@ It implements authentication using an OAuth app’s client ID and secret as well
 - [`createOAuthAppAuth(options)`](#createoauthappauthoptions)
 - [`auth()`](#auth)
 - [Authentication object](#authentication-object)
-  - [OAuth authentication](#oauth-authentication)
-  - [OAuth access token authentication](#oauth-access-token-authentication)
+    - [OAuth authentication](#oauth-authentication)
+    - [OAuth access token authentication](#oauth-access-token-authentication)
 - [`auth.hook(request, route, parameters)` or `auth.hook(request, options)`](#authhookrequest-route-parameters-or-authhookrequest-options)
 - [Implementation details](#implementation-details)
 - [License](#license)
@@ -62,20 +62,18 @@ const auth = createOAuthAppAuth({
   clientSecret: "secret"
 });
 
-// OAuth Apps authenticate using ?client_id=...&client_secret=... query parameters
-// or Basic auth, depending on the request URL (see implementation details below).
+// OAuth Apps authenticate using Basic auth, where
+// username is clientId and password is clientSecret
 const appAuthentication = await auth({
-  type: "oauth-app",
-  url: "/orgs/:org/repos"
+  type: "oauth-app"
 });
 // resolves with
 // {
 //   type: 'oauth-app',
 //   clientId: '123',
 //   clientSecret: 'secret',
-//   query: {
-//     client_id: '123',
-//     client_secret: 'secret'
+//   headers: {
+//     authorization: 'basic MTIzOnNlY3JldA=='
 //   }
 // }
 
@@ -224,22 +222,6 @@ The async `auth()` method returned by `createOAuthAppAuth(options)` accepts the 
     </tr>
     <tr>
       <th>
-        <code>options.url</code>
-      </th>
-      <th>
-        <code>string</code>
-      </th>
-      <td>
-        <strong>Required if <code>options.type</code> set to <code>"oauth-app"</code>.</strong> An absolute URL or endpoint route path. Examples:
-        <ul>
-          <li><code>"https://enterprise.github.com/api/v3/applications/1234567890abcdef1234/tokens/secret123"</code></li>
-          <li><code>"/applications/1234567890abcdef1234/tokens/secret123"</code></li>
-          <li><code>"/applications/:client_id/tokens/:access_token"</code></li>
-        </ul>
-      </td>
-    </tr>
-    <tr>
-      <th>
         <code>options.code</code>
       </th>
       <th>
@@ -339,22 +321,7 @@ The async `auth(options)` method to one of two possible authentication objects
         <code>object</code>
       </th>
       <td>
-        <code>{}</code> if no <code>url</code> option was passed or the passed <code>url</code> option <em>does not</em> match <code>/applications/:client_id/tokens/:access_token</code>.<br>
-        <br>
-        <code>{ authorization }</code> if the passed <code>url</code> option <em>does</em> match <code>/applications/:client_id/tokens/:access_token</code>.
-      </td>
-    </tr>
-    <tr>
-      <th>
-        <code>query</code>
-      </th>
-      <th>
-        <code>object</code>
-      </th>
-      <td>
-        <code>{ client_id, client_secret }</code> if no <code>url</code> option was passed or the passed <code>url</code> option <em>does not</em> match <code>/applications/:client_id/tokens/:access_token</code>.<br>
-        <br>
-        <code>{}</code> if the passed <code>url</code> option <em>does</em> match <code>/applications/:client_id/tokens/:access_token</code>.
+        <code>{ authorization }</code>.
       </td>
     </tr>
   </tbody>
@@ -433,10 +400,7 @@ The `request` option is an instance of [`@octokit/request`](https://github.com/o
 `auth.hook()` can be called directly to send an authenticated request
 
 ```js
-const { data: authorizations } = await auth.hook(
-  request,
-  "GET /applications/:client_id/tokens/:access_token"
-);
+const { data: user } = await auth.hook(request, "GET /user");
 ```
 
 Or it can be passed as option to [`request()`](https://github.com/octokit/request.js#request).
@@ -448,27 +412,23 @@ const requestWithAuth = request.defaults({
   }
 });
 
-const { data: authorization } = await requestWithAuth(
-  "GET /applications/:client_id/tokens/:access_token"
-);
+const { data: user } = await requestWithAuth("GET /user");
 ```
 
 ## Implementation details
 
-Client ID and secret can be passed as URL query parameters (`?client_id=...&client_secret=...`) to get a higher rate limit compared to unauthenticated requests. This is meant for the use on servers only: never expose an OAuth client secret on a client such as a web application!
+Client ID and secret can be passed as Basic auth in the `Authorization` header in order to get a higher rate limit compared to unauthenticated requests. This is meant for the use on servers only: never expose an OAuth client secret on a client such as a web application!
 
-The only exceptions are
+`auth.hook` will set the correct authentication header automatically based on the request URL. For all [OAuth Application endpoints](https://developer.github.com/v3/apps/oauth_applications/), the `Authorization` header is set to basic auth. For all other endpoints and token is retrieved and used in the `Authorization` header. The token is cached and used for succeeding requsets.
 
-- [`GET /applications/:client_id/tokens/:access_token`](https://developer.github.com/v3/oauth_authorizations/#check-an-authorization) - Check an authorization
-- [`POST /applications/:client_id/tokens/:access_token`](https://developer.github.com/v3/oauth_authorizations/#reset-an-authorization) - Reset an authorization
-- [`DELETE /applications/:client_id/tokens/:access_token`](https://developer.github.com/v3/oauth_authorizations/#revoke-an-authorization-for-an-application) - Revoke an authorization for an application
-
-For these endpoints, client ID and secret need to be passed as basic authentication in the `Authorization` header. Because of these exception an `options.url` parameter must be passed to the async `auth()` function if `options.type` is set to `oauth-app`. Additionally, `:client_id` and `:access_token` are defaulted to `options.clientId` passed to `createOAuthAppAuth(options)` and the token which was created using `options.code`, if passed.
-
-To reset the current access token, you can do this
+To reset the cached access token, you can do this
 
 ```js
-await auth.hook(request, "POST /applications/:client_id/tokens/:access_token");
+const { token } = await auth({ type: "token" });
+await auth.hook(request, "POST /applications/:client_id/token", {
+  client_id: "123",
+  access_token: token
+});
 ```
 
 The internally cached token will be replaced and used for succeeding requests. See also ["the REST API documentation"](https://developer.github.com/v3/oauth_authorizations/).
