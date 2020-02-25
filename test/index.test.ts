@@ -3,7 +3,7 @@ import { request } from "@octokit/request";
 
 import { createOAuthAppAuth } from "../src/index";
 
-test("README example with `url`", async () => {
+test("README example with type: 'oauth-app'", async () => {
   const auth = createOAuthAppAuth({
     clientId: "123",
     clientSecret: "secret",
@@ -12,23 +12,20 @@ test("README example with `url`", async () => {
   });
 
   const authentication = await auth({
-    type: "oauth-app",
-    url: "/orgs/:org/repos"
+    type: "oauth-app"
   });
 
   expect(authentication).toEqual({
     type: "oauth-app",
     clientId: "123",
     clientSecret: "secret",
-    headers: {},
-    query: {
-      client_id: "123",
-      client_secret: "secret"
+    headers: {
+      authorization: "basic MTIzOnNlY3JldA==" // btoa('123:secret')
     }
   });
 });
 
-test("README example with `auth: 'token'`", async () => {
+test("README example with `type: 'token'`", async () => {
   const mock = fetchMock.sandbox().postOnce(
     "https://github.com/login/oauth/access_token",
     {
@@ -75,78 +72,6 @@ test("README example with `auth: 'token'`", async () => {
     tokenType: "oauth",
     token: "secret123",
     scopes: []
-  });
-});
-
-test('`url` is "/applications/:client_id/token"', async () => {
-  const auth = createOAuthAppAuth({
-    clientId: "123",
-    clientSecret: "secret",
-    code: "random123",
-    state: "mystate123"
-  });
-
-  const authentication = await auth({
-    type: "oauth-app",
-    url: "/applications/:client_id/token"
-  });
-
-  expect(authentication).toEqual({
-    type: "oauth-app",
-    clientId: "123",
-    clientSecret: "secret",
-    headers: {
-      authorization: "basic MTIzOnNlY3JldA==" // btoa('123:secret')
-    },
-    query: {}
-  });
-});
-
-test('`url` is "/applications/:client_id/grant"', async () => {
-  const auth = createOAuthAppAuth({
-    clientId: "123",
-    clientSecret: "secret",
-    code: "random123",
-    state: "mystate123"
-  });
-
-  const authentication = await auth({
-    type: "oauth-app",
-    url: "/applications/:client_id/grant"
-  });
-
-  expect(authentication).toEqual({
-    type: "oauth-app",
-    clientId: "123",
-    clientSecret: "secret",
-    headers: {
-      authorization: "basic MTIzOnNlY3JldA==" // btoa('123:secret')
-    },
-    query: {}
-  });
-});
-
-test('`url` is "/applications/:client_id/tokens/:access_token" (deprecated)', async () => {
-  const auth = createOAuthAppAuth({
-    clientId: "123",
-    clientSecret: "secret",
-    code: "random123",
-    state: "mystate123"
-  });
-
-  const authentication = await auth({
-    type: "oauth-app",
-    url: "/applications/:client_id/tokens/secret123"
-  });
-
-  expect(authentication).toEqual({
-    type: "oauth-app",
-    clientId: "123",
-    clientSecret: "secret",
-    headers: {
-      authorization: "basic MTIzOnNlY3JldA==" // btoa('123:secret')
-    },
-    query: {}
   });
 });
 
@@ -343,78 +268,6 @@ test("auth.hook() creates token and uses it for succeeding requests", async () =
   expect(mock.done()).toBe(true);
 });
 
-test("auth.hook defaults URL parameters for '/applications/:client_id/tokens/:access_token'", async () => {
-  const mock = fetchMock
-    .sandbox()
-    .postOnce("https://github.com/login/oauth/access_token", {
-      access_token: "secret123",
-      scope: ""
-    })
-    .getOnce(
-      "https://api.github.com/applications/123/tokens/secret123",
-      { id: 123 },
-      {
-        headers: {
-          authorization: "basic MTIzOnNlY3JldA==" // btoa('123:secret')
-        }
-      }
-    )
-    .getOnce(
-      "https://api.github.com/applications/123/tokens/othersecret",
-      { id: 456 },
-      {
-        headers: {
-          authorization: "basic MTIzOnNlY3JldA==" // btoa('123:secret')
-        }
-      }
-    )
-    .getOnce(
-      "https://api.github.com/applications/123/tokens/yetanothersecret",
-      { id: 789 },
-      {
-        headers: {
-          authorization: "basic MTIzOnNlY3JldA==" // btoa('123:secret')
-        }
-      }
-    );
-
-  const auth = createOAuthAppAuth({
-    clientId: "123",
-    clientSecret: "secret",
-    code: "random123",
-    state: "mystate123"
-  });
-
-  const requestWithMock = request.defaults({
-    request: {
-      fetch: mock
-    }
-  });
-  const requestWithAuth = requestWithMock.defaults({
-    request: {
-      hook: auth.hook
-    }
-  });
-
-  const { data: data1 } = await requestWithAuth(
-    "GET /applications/:client_id/tokens/:access_token"
-  );
-  const {
-    data: data2
-  } = await requestWithAuth(
-    "GET /applications/:client_id/tokens/:access_token",
-    { access_token: "othersecret" }
-  );
-  const { data: data3 } = await requestWithAuth(
-    "GET /applications/123/tokens/yetanothersecret"
-  );
-
-  expect(mock.done()).toBe(true);
-  expect(data1.id).toBe(123);
-  expect(data2.id).toBe(456);
-  expect(data3.id).toBe(789);
-});
-
 test("auth.hook(request, 'POST https://github.com/login/oauth/access_token') does not send request twice (#35)", async () => {
   const mock = fetchMock
     .sandbox()
@@ -445,7 +298,7 @@ test("auth.hook(request, 'POST https://github.com/login/oauth/access_token') doe
   });
 });
 
-test("auth.hook(request, 'POST /applications/:client_id/tokens/:access_token') resets the used token", async () => {
+test("auth.hook(request, 'POST /applications/:client_id/tokens/:access_token') resets the used token (legacy endpoint)", async () => {
   const mock = fetchMock
     .sandbox()
     .postOnce("https://github.com/login/oauth/access_token", {
@@ -457,7 +310,7 @@ test("auth.hook(request, 'POST /applications/:client_id/tokens/:access_token') r
       { id: 123 },
       {
         headers: {
-          authorization: "token secret123" // btoa('123:secret')
+          authorization: "token secret123"
         }
       }
     )
@@ -469,7 +322,7 @@ test("auth.hook(request, 'POST /applications/:client_id/tokens/:access_token') r
       { id: 123 },
       {
         headers: {
-          authorization: "token newsecret123" // btoa('123:secret')
+          authorization: "token newsecret123"
         },
         overwriteRoutes: false
       }
@@ -492,7 +345,121 @@ test("auth.hook(request, 'POST /applications/:client_id/tokens/:access_token') r
   const response1 = await requestWithAuth("GET /user");
   expect(response1.data).toStrictEqual({ id: 123 });
 
-  await requestWithAuth("POST /applications/:client_id/tokens/:access_token");
+  await requestWithAuth("POST /applications/:client_id/tokens/:access_token", {
+    client_id: "123",
+    access_token: "secret123"
+  });
+
+  const response2 = await requestWithAuth("GET /user");
+  expect(response2.data).toStrictEqual({ id: 123 });
+});
+
+test("auth.hook(request, 'POST /applications/:client_id/token') checks token", async () => {
+  const mock = fetchMock
+    .sandbox()
+    .postOnce("https://github.com/login/oauth/access_token", {
+      access_token: "secret123",
+      scope: ""
+    })
+    .postOnce(
+      "https://api.github.com/applications/123/token",
+      {
+        token: "secret123"
+      },
+      {
+        body: {
+          access_token: "secret123"
+        }
+      }
+    );
+
+  const auth = createOAuthAppAuth({
+    clientId: "123",
+    clientSecret: "secret",
+    code: "random123",
+    state: "mystate123"
+  });
+
+  const requestWithAuth = request.defaults({
+    request: {
+      fetch: mock,
+      hook: auth.hook
+    }
+  });
+
+  const response = await requestWithAuth(
+    "POST /applications/:client_id/token",
+    {
+      client_id: "123",
+      access_token: "secret123"
+    }
+  );
+
+  expect(response.data).toStrictEqual({
+    token: "secret123"
+  });
+});
+
+test("auth.hook(request, 'PATCH /applications/:client_id/token') resets the used token", async () => {
+  const mock = fetchMock
+    .sandbox()
+    .postOnce("https://github.com/login/oauth/access_token", {
+      access_token: "secret123",
+      scope: ""
+    })
+    .getOnce(
+      "https://api.github.com/user",
+      { id: 123 },
+      {
+        headers: {
+          authorization: "token secret123"
+        }
+      }
+    )
+    .patchOnce(
+      "https://api.github.com/applications/123/token",
+      {
+        token: "newsecret123"
+      },
+      {
+        body: {
+          access_token: "secret123"
+        }
+      }
+    )
+    .getOnce(
+      "https://api.github.com/user",
+      { id: 123 },
+      {
+        headers: {
+          authorization: "token newsecret123"
+        },
+        overwriteRoutes: false
+      }
+    );
+
+  const auth = createOAuthAppAuth({
+    clientId: "123",
+    clientSecret: "secret",
+    code: "random123",
+    state: "mystate123"
+  });
+
+  const requestWithAuth = request.defaults({
+    request: {
+      fetch: mock,
+      hook: auth.hook
+    }
+  });
+
+  const response1 = await requestWithAuth("GET /user");
+  expect(response1.data).toStrictEqual({ id: 123 });
+
+  await requestWithAuth("PATCH /applications/:client_id/token", {
+    client_id: "123",
+    access_token: "secret123"
+  });
+
   const response2 = await requestWithAuth("GET /user");
   expect(response2.data).toStrictEqual({ id: 123 });
 });
