@@ -433,7 +433,7 @@ await auth.hook(request, "POST /applications/:client_id/token", {
 
 The internally cached token will be replaced and used for succeeding requests. See also ["the REST API documentation"](https://developer.github.com/v3/oauth_authorizations/).
 
-See also: [octokit/oauth-login-url.js](https://github.com/octokit/oauth-login-url.js).
+See also: [octokit/oauth-authorization-url.js](https://github.com/octokit/oauth-authorization-url.js).
 
 ## License
 
