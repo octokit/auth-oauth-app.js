@@ -22,7 +22,6 @@ export type StrategyOptions = {
 
 type AuthAppOptions = {
   type: "oauth-app";
-  url: string;
 };
 export type AuthTokenOptions = {
   type: "token";
@@ -46,11 +45,7 @@ export type appAuthentication = {
   clientId: string;
   clientSecret: string;
   headers: {
-    authorization?: string;
-  };
-  query: {
-    client_id?: string;
-    client_secret?: string;
+    authorization: string;
   };
 };
 export type Authentication = TokenAuthentication | appAuthentication;
