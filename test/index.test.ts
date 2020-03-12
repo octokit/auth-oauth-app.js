@@ -223,7 +223,7 @@ test("test with request instance that has custom baseUrl (GHE)", async () => {
   });
 });
 
-test("auth.hook() creates token and uses it for succeeding requests", async () => {
+test("auth.hook() creates token and uses it for succeeding requests (if code option was set)", async () => {
   const mock = fetchMock
     .sandbox()
     .postOnce("https://github.com/login/oauth/access_token", {
@@ -264,6 +264,39 @@ test("auth.hook() creates token and uses it for succeeding requests", async () =
 
   await requestWithAuth("GET /user");
   await requestWithAuth("GET /user");
+
+  expect(mock.done()).toBe(true);
+});
+
+test("auth.hook() does not attempt to create token if code option was not set", async () => {
+  const mock = fetchMock.sandbox().get(
+    "https://api.github.com/repos/octocat/hello-world",
+    { id: 123 },
+    {
+      headers: {
+        authorization: "basic MTIzOnNlY3JldA==" // btoa('123:secret')
+      }
+    }
+  );
+
+  const auth = createOAuthAppAuth({
+    clientId: "123",
+    clientSecret: "secret"
+  });
+
+  const requestWithAuth = request
+    .defaults({
+      request: {
+        fetch: mock
+      }
+    })
+    .defaults({
+      request: {
+        hook: auth.hook
+      }
+    });
+
+  await requestWithAuth("GET /repos/octocat/hello-world");
 
   expect(mock.done()).toBe(true);
 });

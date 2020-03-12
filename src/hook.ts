@@ -28,7 +28,7 @@ export async function hook(
     return request(endpoint);
   }
 
-  if (requiresBasicAuth(endpoint.url)) {
+  if (!state.code || requiresBasicAuth(endpoint.url)) {
     const credentials = btoa(`${state.clientId}:${state.clientSecret}`);
     endpoint.headers.authorization = `basic ${credentials}`;
 
