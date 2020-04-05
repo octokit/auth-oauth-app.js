@@ -173,7 +173,7 @@ The `createOAuthAppAuth` method accepts a single parameter with two keys
         <code>function</code>
       </th>
       <td>
-        You can pass in your own <a href="https://github.com/octokit/request.js"><code>@octokit/request</code></a> instance. For usage with enterprise, set <code>baseUrl</code> to the hostname. Example:
+        You can pass in your own <a href="https://github.com/octokit/request.js"><code>@octokit/request</code></a> instance. For usage with enterprise, set <code>baseUrl</code> to the API root endpoint. Example:
 
 ```js
 const { request } = require("@octokit/request");
@@ -181,7 +181,7 @@ createOAuthAppAuth({
   clientId: 123,
   clientSecret: "secret",
   request: request.defaults({
-    baseUrl: "https://ghe.my-company.com"
+    baseUrl: "https://ghe.my-company.com/api/v3"
   })
 });
 ```
