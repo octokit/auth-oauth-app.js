@@ -4,7 +4,6 @@
 
 [![@latest](https://img.shields.io/npm/v/@octokit/auth-oauth-app.svg)](https://www.npmjs.com/package/@octokit/auth-oauth-app)
 [![Build Status](https://github.com/octokit/auth-oauth-app.js/workflows/Test/badge.svg)](https://github.com/octokit/auth-oauth-app.js/actions?query=workflow%3ATest)
-[![Greenkeeper](https://badges.greenkeeper.io/octokit/auth-oauth-app.js.svg)](https://greenkeeper.io/)
 
 `@octokit/auth-oauth-app` is implementing one of [GitHub’s authentication strategies](https://github.com/octokit/auth.js).
 
@@ -59,13 +58,13 @@ const { createOAuthAppAuth } = require("@octokit/auth-oauth-app");
 ```js
 const auth = createOAuthAppAuth({
   clientId: "123",
-  clientSecret: "secret"
+  clientSecret: "secret",
 });
 
 // OAuth Apps authenticate using Basic auth, where
 // username is clientId and password is clientSecret
 const appAuthentication = await auth({
-  type: "oauth-app"
+  type: "oauth-app",
 });
 // resolves with
 // {
@@ -80,7 +79,7 @@ const appAuthentication = await auth({
 const tokenAuthentication = await auth({
   type: "token",
   code: "random123", // code from OAuth web flow, see https://git.io/fhd1D
-  state: "mystate123"
+  state: "mystate123",
 });
 // resolves with
 // {
@@ -181,8 +180,8 @@ createOAuthAppAuth({
   clientId: 123,
   clientSecret: "secret",
   request: request.defaults({
-    baseUrl: "https://ghe.my-company.com/api/v3"
-  })
+    baseUrl: "https://ghe.my-company.com/api/v3",
+  }),
 });
 ```
 
@@ -408,8 +407,8 @@ Or it can be passed as option to [`request()`](https://github.com/octokit/reques
 ```js
 const requestWithAuth = request.defaults({
   request: {
-    hook: auth.hook
-  }
+    hook: auth.hook,
+  },
 });
 
 const { data: user } = await requestWithAuth("GET /user");
@@ -427,7 +426,7 @@ To reset the cached access token, you can do this
 const { token } = await auth({ type: "token" });
 await auth.hook(request, "POST /applications/:client_id/token", {
   client_id: "123",
-  access_token: token
+  access_token: token,
 });
 ```
 
