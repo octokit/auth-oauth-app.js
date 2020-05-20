@@ -4,22 +4,21 @@ import {
   AuthTokenOptions,
   RequestInterface,
   State,
-  TokenWithScopes
+  TokenWithScopes,
 } from "./types";
 
 export async function getOAuthAccessToken(
   state: State,
-  options?: {
+  options: {
     request?: RequestInterface;
     auth?: AuthTokenOptions;
   }
 ): Promise<TokenWithScopes> {
-  /* istanbul ignore next: coverage probles with optional chaning */
-  const authOptionsPassed = typeof options?.auth?.code !== "undefined";
-  const authOptions = authOptionsPassed
-    ? /* istanbul ignore next: coverage probles with optional chaning */
-      (options?.auth as AuthTokenOptions)
-    : state;
+  const authOptionsPassed = options.auth
+    ? typeof options.auth.code !== "undefined"
+    : false;
+
+  const authOptions = options.auth && authOptionsPassed ? options.auth : state;
 
   if (state.token && !authOptionsPassed) {
     return state.token;
@@ -36,18 +35,17 @@ export async function getOAuthAccessToken(
         "/login/oauth/access_token"
       )}`;
 
-  /* istanbul ignore next: coverage probles with optional chaning */
-  const request = options?.request || state.request;
+  const request = options.request || state.request;
 
   const parameters = {
     headers: {
-      accept: "application/json"
+      accept: "application/json",
     },
     client_id: state.clientId,
     client_secret: state.clientSecret,
     code: authOptions.code,
     redirect_uri: authOptions.redirectUrl,
-    state: authOptions.state
+    state: authOptions.state,
   };
 
   const response = await request(route, parameters);
@@ -58,7 +56,7 @@ export async function getOAuthAccessToken(
       response.status,
       {
         headers: response.headers,
-        request: request.endpoint(route, parameters)
+        request: request.endpoint(route, parameters),
       }
     );
   }
@@ -67,7 +65,7 @@ export async function getOAuthAccessToken(
 
   const newToken = {
     token: data.access_token,
-    scopes: data.scope.split(/,\s*/).filter(Boolean)
+    scopes: data.scope.split(/,\s*/).filter(Boolean),
   };
 
   if (!authOptionsPassed) {
