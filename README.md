@@ -15,8 +15,8 @@ It implements authentication using an OAuth app’s client ID and secret as well
 - [`createOAuthAppAuth(options)`](#createoauthappauthoptions)
 - [`auth()`](#auth)
 - [Authentication object](#authentication-object)
-    - [OAuth authentication](#oauth-authentication)
-    - [OAuth access token authentication](#oauth-access-token-authentication)
+  - [OAuth authentication](#oauth-authentication)
+  - [OAuth access token authentication](#oauth-access-token-authentication)
 - [`auth.hook(request, route, parameters)` or `auth.hook(request, options)`](#authhookrequest-route-parameters-or-authhookrequest-options)
 - [Implementation details](#implementation-details)
 - [License](#license)
@@ -92,7 +92,7 @@ const tokenAuthentication = await auth({
 
 ## `createOAuthAppAuth(options)`
 
-The `createOAuthAppAuth` method accepts a single parameter with two keys
+The `createOAuthAppAuth` method accepts a single `options` parameter
 
 <table width="100%">
   <thead align=left>
