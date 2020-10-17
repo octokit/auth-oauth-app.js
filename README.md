@@ -31,11 +31,11 @@ It implements authentication using an OAuth app’s client ID and secret as well
 Browsers
 </th><td width=100%>
 
-Load `@octokit/auth-oauth-app` directly from [cdn.pika.dev](https://cdn.pika.dev)
+Load `@octokit/auth-oauth-app` directly from [cdn.skypack.dev](https://cdn.skypack.dev)
 
 ```html
 <script type="module">
-  import { createOAuthAppAuth } from "https://cdn.pika.dev/@octokit/auth-oauth-app";
+  import { createOAuthAppAuth } from "https://cdn.skypack.dev/@octokit/auth-oauth-app";
 </script>
 ```
 
