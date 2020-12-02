@@ -424,7 +424,7 @@ To reset the cached access token, you can do this
 
 ```js
 const { token } = await auth({ type: "token" });
-await auth.hook(request, "POST /applications/:client_id/token", {
+await auth.hook(request, "POST /applications/{client_id}/token", {
   client_id: "123",
   access_token: token,
 });
