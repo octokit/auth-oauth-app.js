@@ -8,7 +8,7 @@ import {
   RequestParameters,
   RequestInterface,
   Route,
-  State
+  State,
 } from "./types";
 import { EndpointDefaults } from "@octokit/types";
 
@@ -34,22 +34,24 @@ export async function hook(
 
     const response = await request(endpoint);
 
-    const parsedEndpoint = request.endpoint.parse(endpoint);
-    // `POST /applications/:client_id/tokens/:access_token` (legacy) or
-    // `PATCH /applications/:client_id/token` resets the passed token
+    // `POST /applications/{client_id}/tokens/{access_token}` (legacy) or
+    // `PATCH /applications/{client_id}/token` resets the passed token
     // and returns a new one. If that’s the current request then update internal state.
+    // Regex supports both the `{param}` as well as the legacy `:param` notation
     const isLegacyTokenResetRequest =
       endpoint.method === "POST" &&
-      /^\/applications\/:?[\w_]+\/tokens\/:?[\w_]+$/.test(endpoint.url);
+      /^\/applications\/[:{]?[\w_]+\}?\/tokens\/[:{]?[\w_]+\}?$/.test(
+        endpoint.url
+      );
     const isTokenResetRequest =
       endpoint.method === "PATCH" &&
-      /^\/applications\/:?[\w_]+\/token$/.test(endpoint.url);
+      /^\/applications\/[:{]?[\w_]+\}?\/token$/.test(endpoint.url);
 
     if (isLegacyTokenResetRequest || isTokenResetRequest) {
       state.token = {
         token: response.data.token,
         // @ts-ignore figure this out
-        scope: response.data.scopes
+        scope: response.data.scopes,
       };
     }
 
