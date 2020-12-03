@@ -376,7 +376,7 @@ test("auth.hook(request, 'POST /applications/{client_id}/tokens/{access_token}')
   });
 
   const response1 = await requestWithAuth("GET /user");
-  expect(response1.data).toStrictEqual({ id: 123 });
+  expect(response1.data.id).toEqual(123);
 
   await requestWithAuth(
     "POST /applications/{client_id}/tokens/{access_token}",
@@ -387,7 +387,7 @@ test("auth.hook(request, 'POST /applications/{client_id}/tokens/{access_token}')
   );
 
   const response2 = await requestWithAuth("GET /user");
-  expect(response2.data).toStrictEqual({ id: 123 });
+  expect(response1.data.id).toEqual(123);
 });
 
 test("auth.hook(request, 'POST /applications/{client_id}/token') checks token", async () => {
@@ -431,9 +431,7 @@ test("auth.hook(request, 'POST /applications/{client_id}/token') checks token", 
     }
   );
 
-  expect(response.data).toStrictEqual({
-    token: "secret123",
-  });
+  expect(response.data.token).toEqual("secret123");
 });
 
 test("auth.hook(request, 'PATCH /applications/{client_id}/token') resets the used token", async () => {
@@ -489,7 +487,7 @@ test("auth.hook(request, 'PATCH /applications/{client_id}/token') resets the use
   });
 
   const response1 = await requestWithAuth("GET /user");
-  expect(response1.data).toStrictEqual({ id: 123 });
+  expect(response1.data.id).toEqual(123);
 
   await requestWithAuth("PATCH /applications/{client_id}/token", {
     client_id: "123",
@@ -497,7 +495,7 @@ test("auth.hook(request, 'PATCH /applications/{client_id}/token') resets the use
   });
 
   const response2 = await requestWithAuth("GET /user");
-  expect(response2.data).toStrictEqual({ id: 123 });
+  expect(response2.data.id).toEqual(123);
 });
 
 test("oauth endpoint error", async () => {
