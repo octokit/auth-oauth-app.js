@@ -13,7 +13,7 @@ It implements authentication using an OAuth app’s client ID and secret as well
 
 - [Usage](#usage)
 - [`createOAuthAppAuth(options)`](#createoauthappauthoptions)
-- [`auth()`](#auth)
+- [`auth(options)`](#authoptions)
 - [Authentication object](#authentication-object)
     - [OAuth authentication](#oauth-authentication)
     - [OAuth access token authentication](#oauth-access-token-authentication)
@@ -189,7 +189,7 @@ createOAuthAppAuth({
   </tbody>
 </table>
 
-## `auth()`
+## `auth(options)`
 
 The async `auth()` method returned by `createOAuthAppAuth(options)` accepts the following options
 
