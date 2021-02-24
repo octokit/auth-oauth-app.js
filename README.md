@@ -418,7 +418,7 @@ const { data: user } = await requestWithAuth("GET /user");
 
 Client ID and secret can be passed as Basic auth in the `Authorization` header in order to get a higher rate limit compared to unauthenticated requests. This is meant for the use on servers only: never expose an OAuth client secret on a client such as a web application!
 
-`auth.hook` will set the correct authentication header automatically based on the request URL. For all [OAuth Application endpoints](https://developer.github.com/v3/apps/oauth_applications/), the `Authorization` header is set to basic auth. For all other endpoints and token is retrieved and used in the `Authorization` header. The token is cached and used for succeeding requsets.
+`auth.hook` will set the correct authentication header automatically based on the request URL. For all [OAuth Application endpoints](https://developer.github.com/v3/apps/oauth_applications/), the `Authorization` header is set to basic auth. For all other endpoints and token is retrieved and used in the `Authorization` header. The token is cached and used for succeeding requests.
 
 To reset the cached access token, you can do this
 
