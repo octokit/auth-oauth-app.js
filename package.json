@@ -9,7 +9,7 @@
     "build": "pika build",
     "test": "jest --coverage"
   },
-  "repository": "https://github.com/octokit/auth-oauth-app.js",
+  "repository": "github:octokit/auth-oauth-app.js",
   "keywords": [
     "github",
     "octokit",
@@ -19,10 +19,6 @@
   ],
   "author": "Gregor Martynus (https://github.com/gr2m)",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/octokit/auth-oauth-app.js/issues"
-  },
-  "homepage": "https://github.com/octokit/auth-oauth-app.js#readme",
   "dependencies": {
     "@octokit/request": "^5.3.0",
     "@octokit/request-error": "^2.0.0",
