@@ -227,7 +227,7 @@ The async `auth()` method returned by `createOAuthAppAuth(options)` accepts the 
         <code>string</code>
       </th>
       <td>
-        Only relevant if <code>options.type</code> is set to <code>"token"</code>. The authorization <code>code</code> which was passed as query parameter to the callback URL from the <a href="https://developer.github.com/apps/building-oauth-apps/authorizing-oauth-apps/#2-users-are-redirected-back-to-your-site-by-github">OAuth web application flow</a>. Defaults to what was set in the strategy options.
+        Only relevant if <code>options.type</code> is set to <code>"oauth-user"</code>. The authorization <code>code</code> which was passed as query parameter to the callback URL from the <a href="https://developer.github.com/apps/building-oauth-apps/authorizing-oauth-apps/#2-users-are-redirected-back-to-your-site-by-github">OAuth web application flow</a>. Defaults to what was set in the strategy options.
       </td>
     </tr>
     <tr>
@@ -238,7 +238,7 @@ The async `auth()` method returned by `createOAuthAppAuth(options)` accepts the 
         <code>string</code>
       </th>
       <td>
-        Only relevant if <code>options.type</code> is set to <code>"token"</code>. The URL in your application where users are sent after authorization. See <a href="https://developer.github.com/apps/building-oauth-apps/authorizing-oauth-apps/#redirect-urls">redirect urls</a>. Defaults to what was set in the strategy options.
+        Only relevant if <code>options.type</code> is set to <code>"oauth-user"</code>. The URL in your application where users are sent after authorization. See <a href="https://developer.github.com/apps/building-oauth-apps/authorizing-oauth-apps/#redirect-urls">redirect urls</a>. Defaults to what was set in the strategy options.
       </td>
     </tr>
     <tr>
@@ -249,7 +249,7 @@ The async `auth()` method returned by `createOAuthAppAuth(options)` accepts the 
         <code>string</code>
       </th>
       <td>
-        Only relevant if <code>options.type</code> is set to <code>"token"</code>. The unguessable random string you provided in Step 1 of the <a href="https://developer.github.com/apps/building-oauth-apps/authorizing-oauth-apps/#2-users-are-redirected-back-to-your-site-by-github">OAuth web application flow</a>. Defaults to what was set in the strategy options.
+        Only relevant if <code>options.type</code> is set to <code>"oauth-user"</code>. The unguessable random string you provided in Step 1 of the <a href="https://developer.github.com/apps/building-oauth-apps/authorizing-oauth-apps/#2-users-are-redirected-back-to-your-site-by-github">OAuth web application flow</a>. Defaults to what was set in the strategy options.
       </td>
     </tr>
   </tbody>
@@ -423,7 +423,7 @@ Client ID and secret can be passed as Basic auth in the `Authorization` header i
 To reset the cached access token, you can do this
 
 ```js
-const { token } = await auth({ type: "token" });
+const { token } = await auth({ type: "oauth-user" });
 await auth.hook(request, "POST /applications/{client_id}/token", {
   client_id: "123",
   access_token: token,
