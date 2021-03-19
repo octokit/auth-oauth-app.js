@@ -150,8 +150,9 @@ test("auth.hook with custom baseUrl (GHE)", async () => {
 
   const { data } = await auth.hook(
     requestWithMock,
-    "POST /applications/123/token",
+    "POST /applications/{client_id}/token",
     {
+      client_id: "123",
       access_token: "secret123",
     }
   );
