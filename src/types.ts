@@ -14,9 +14,6 @@ export type StrategyInterface = OctokitTypes.StrategyInterface<
 export type StrategyOptions = {
   clientId: string;
   clientSecret: string;
-  code?: string;
-  redirectUrl?: string;
-  state?: string;
   request?: RequestInterface;
 };
 
@@ -25,7 +22,7 @@ export type AuthAppOptions = {
 };
 export type AuthTokenOptions = {
   type: "oauth-user";
-  code?: string;
+  code: string;
   redirectUrl?: string;
   state?: string;
 };

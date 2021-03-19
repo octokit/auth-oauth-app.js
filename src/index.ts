@@ -17,23 +17,9 @@ export type Types = {
   Authentication: Authentication;
 };
 
-const deprecatedStrategyOptions = ["code", "redirectUrl", "state"];
-
 export function createOAuthAppAuth(
   options: StrategyOptions
 ): OAuthAppAuthInterface {
-  const usedDeprecatedOptions = deprecatedStrategyOptions.filter(
-    (option) => option in options
-  );
-
-  if (usedDeprecatedOptions.length) {
-    console.warn(
-      `[@octokit/auth-oauth-app] "${usedDeprecatedOptions.join(
-        ", "
-      )}" strategy options are deprecated. Use "@octokit/auth-oauth-user" instead`
-    );
-  }
-
   const state = Object.assign(
     {
       request: request.defaults({
@@ -45,7 +31,7 @@ export function createOAuthAppAuth(
     options
   );
 
-  // @ts-expect-error wtf
+  // @ts-expect-error not worth the extra code to appease TypeScript
   return Object.assign(auth.bind(null, state), {
     hook: hook.bind(null, state),
   });

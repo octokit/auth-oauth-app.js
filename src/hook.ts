@@ -1,6 +1,5 @@
 import btoa from "btoa-lite";
 
-import { getOAuthAccessToken } from "./get-oauth-access-token";
 import { requiresBasicAuth } from "./requires-basic-auth";
 import {
   AnyResponse,
@@ -28,42 +27,14 @@ export async function hook(
     return request(endpoint);
   }
 
-  if (!state.code || requiresBasicAuth(endpoint.url)) {
-    const credentials = btoa(`${state.clientId}:${state.clientSecret}`);
-    endpoint.headers.authorization = `basic ${credentials}`;
-
-    const response = await request(endpoint);
-
-    // `POST /applications/{client_id}/tokens/{access_token}` (legacy) or
-    // `PATCH /applications/{client_id}/token` resets the passed token
-    // and returns a new one. If that’s the current request then update internal state.
-    // Regex supports both the `{param}` as well as the legacy `:param` notation
-    const isLegacyTokenResetRequest =
-      endpoint.method === "POST" &&
-      /^\/applications\/[:{]?[\w_]+\}?\/tokens\/[:{]?[\w_]+\}?$/.test(
-        endpoint.url
-      );
-    const isTokenResetRequest =
-      endpoint.method === "PATCH" &&
-      /^\/applications\/[:{]?[\w_]+\}?\/token$/.test(endpoint.url);
-
-    if (isLegacyTokenResetRequest || isTokenResetRequest) {
-      state.token = {
-        token: response.data.token,
-        // @ts-ignore figure this out
-        scope: response.data.scopes,
-      };
-    }
-
-    return response;
+  if (!requiresBasicAuth(endpoint.url)) {
+    throw new Error(
+      `[@octokit/auth-oauth-app] "${endpoint.method} ${endpoint.url}" does not support clientId/clientSecret basic authentication. Use @octokit/auth-oauth-user instead.`
+    );
   }
 
-  console.warn(
-    `[@octokit/auth-oauth-app] setting user authentication is deprecated. Use "@octokit/auth-oauth-user" instead`
-  );
+  const credentials = btoa(`${state.clientId}:${state.clientSecret}`);
+  endpoint.headers.authorization = `basic ${credentials}`;
 
-  const { token } = await getOAuthAccessToken(state, { request });
-  endpoint.headers.authorization = `token ${token}`;
-
-  return request(endpoint as EndpointOptions);
+  return await request(endpoint);
 }

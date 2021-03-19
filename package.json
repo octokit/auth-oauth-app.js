@@ -7,6 +7,9 @@
   "description": "GitHub OAuth App authentication for JavaScript",
   "scripts": {
     "build": "pika build",
+    "lint": "prettier --check '{src,test}/**/*' README.md package.json",
+    "lint:fix": "prettier --write '{src,test}/**/*' README.md package.json",
+    "pretest": "npm run -s lint",
     "test": "jest --coverage"
   },
   "repository": "github:octokit/auth-oauth-app.js",
@@ -21,7 +24,7 @@
   "license": "MIT",
   "dependencies": {
     "@octokit/request": "^5.3.0",
-    "@octokit/request-error": "^2.0.0",
+    "@octokit/request-error": "^2.0.5",
     "@octokit/types": "^6.0.3",
     "@types/btoa-lite": "^1.0.0",
     "btoa-lite": "^1.0.0",
@@ -36,6 +39,7 @@
     "@types/jest": "^26.0.0",
     "fetch-mock": "^9.0.0",
     "jest": "^26.0.0",
+    "prettier": "^2.2.1",
     "semantic-release": "^17.0.0",
     "semantic-release-plugin-update-version-in-files": "^1.0.0",
     "ts-jest": "^26.0.0",
