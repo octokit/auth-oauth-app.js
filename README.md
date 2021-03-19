@@ -31,13 +31,7 @@ It implements authentication using an OAuth app’s client ID and secret as well
 Browsers
 </th><td width=100%>
 
-Load `@octokit/auth-oauth-app` directly from [cdn.skypack.dev](https://cdn.skypack.dev)
-
-```html
-<script type="module">
-  import { createOAuthAppAuth } from "https://cdn.skypack.dev/@octokit/auth-oauth-app";
-</script>
-```
+`@octokit/auth-oauth-app` is not meant for usage in the browser. The OAuth APIs to create tokens do not have CORS enabled, and a client secret must not be exposed to the client.
 
 </td></tr>
 <tr><th>
@@ -133,39 +127,6 @@ The `createOAuthAppAuth` method accepts a single `options` parameter
     </tr>
     <tr>
       <th>
-        <code>options.code</code>
-      </th>
-      <th>
-        <code>string</code>
-      </th>
-      <td>
-        The authorization <code>code</code> which was passed as query parameter to the callback URL from the <a href="https://developer.github.com/apps/building-oauth-apps/authorizing-oauth-apps/#2-users-are-redirected-back-to-your-site-by-github">OAuth web application flow</a>.
-      </td>
-    </tr>
-    <tr>
-      <th>
-        <code>options.redirectUrl</code>
-      </th>
-      <th>
-        <code>string</code>
-      </th>
-      <td>
-        The URL in your application where users are sent after authorization. See <a href="https://developer.github.com/apps/building-oauth-apps/authorizing-oauth-apps/#redirect-urls">redirect urls</a>.
-      </td>
-    </tr>
-    <tr>
-      <th>
-        <code>options.state</code>
-      </th>
-      <th>
-        <code>string</code>
-      </th>
-      <td>
-        The unguessable random string you provided in Step 1 of the <a href="https://developer.github.com/apps/building-oauth-apps/authorizing-oauth-apps/#2-users-are-redirected-back-to-your-site-by-github">OAuth web application flow</a>.
-      </td>
-    </tr>
-    <tr>
-      <th>
         <code>options.request</code>
       </th>
       <th>
@@ -227,7 +188,7 @@ The async `auth()` method returned by `createOAuthAppAuth(options)` accepts the 
         <code>string</code>
       </th>
       <td>
-        Only relevant if <code>options.type</code> is set to <code>"oauth-user"</code>. The authorization <code>code</code> which was passed as query parameter to the callback URL from the <a href="https://developer.github.com/apps/building-oauth-apps/authorizing-oauth-apps/#2-users-are-redirected-back-to-your-site-by-github">OAuth web application flow</a>. Defaults to what was set in the strategy options.
+        <strong>Required if <code>options.type</code> is set to <code>"oauth-user"</code></strong>. The authorization <code>code</code> which was passed as query parameter to the callback URL from the <a href="https://developer.github.com/apps/building-oauth-apps/authorizing-oauth-apps/#2-users-are-redirected-back-to-your-site-by-github">OAuth web application flow</a>.
       </td>
     </tr>
     <tr>
@@ -238,7 +199,7 @@ The async `auth()` method returned by `createOAuthAppAuth(options)` accepts the 
         <code>string</code>
       </th>
       <td>
-        Only relevant if <code>options.type</code> is set to <code>"oauth-user"</code>. The URL in your application where users are sent after authorization. See <a href="https://developer.github.com/apps/building-oauth-apps/authorizing-oauth-apps/#redirect-urls">redirect urls</a>. Defaults to what was set in the strategy options.
+        Only relevant if <code>options.type</code> is set to <code>"oauth-user"</code>. The URL in your application where users are sent after authorization. See <a href="https://developer.github.com/apps/building-oauth-apps/authorizing-oauth-apps/#redirect-urls">redirect urls</a>. 
       </td>
     </tr>
     <tr>
@@ -249,7 +210,7 @@ The async `auth()` method returned by `createOAuthAppAuth(options)` accepts the 
         <code>string</code>
       </th>
       <td>
-        Only relevant if <code>options.type</code> is set to <code>"oauth-user"</code>. The unguessable random string you provided in Step 1 of the <a href="https://developer.github.com/apps/building-oauth-apps/authorizing-oauth-apps/#2-users-are-redirected-back-to-your-site-by-github">OAuth web application flow</a>. Defaults to what was set in the strategy options.
+        Only relevant if <code>options.type</code> is set to <code>"oauth-user"</code>. The unguessable random string you provided in Step 1 of the <a href="https://developer.github.com/apps/building-oauth-apps/authorizing-oauth-apps/#2-users-are-redirected-back-to-your-site-by-github">OAuth web application flow</a>.
       </td>
     </tr>
   </tbody>
@@ -392,14 +353,21 @@ The async `auth(options)` method to one of two possible authentication objects
 
 ## `auth.hook(request, route, parameters)` or `auth.hook(request, options)`
 
-`auth.hook()` hooks directly into the request life cycle. It amends the request to authenticate correctly based on the request URL.
+`auth.hook()` hooks directly into the request life cycle. It amends the request to authenticate correctly using `clientId` and `clientSecret` as basic auth for the API endpoints that support it. It throws an error in other cases.
 
 The `request` option is an instance of [`@octokit/request`](https://github.com/octokit/request.js#readme). The `route`/`options` parameters are the same as for the [`request()` method](https://github.com/octokit/request.js#request).
 
 `auth.hook()` can be called directly to send an authenticated request
 
 ```js
-const { data: user } = await auth.hook(request, "GET /user");
+const { data: user } = await auth.hook(
+  request,
+  "POST /applications/{client_id}/token",
+  {
+    client_id: "123",
+    access_token: "token123",
+  }
+);
 ```
 
 Or it can be passed as option to [`request()`](https://github.com/octokit/request.js#request).
@@ -411,7 +379,13 @@ const requestWithAuth = request.defaults({
   },
 });
 
-const { data: user } = await requestWithAuth("GET /user");
+const { data: user } = await requestWithAuth(
+  "POST /applications/{client_id}/token",
+  {
+    client_id: "123",
+    access_token: "token123",
+  }
+);
 ```
 
 ## Implementation details
