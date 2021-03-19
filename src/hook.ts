@@ -1,6 +1,6 @@
 import btoa from "btoa-lite";
+import { requiresBasicAuth } from "@octokit/auth-oauth-user";
 
-import { requiresBasicAuth } from "./requires-basic-auth";
 import {
   AnyResponse,
   EndpointOptions,
