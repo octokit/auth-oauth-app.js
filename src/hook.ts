@@ -58,6 +58,10 @@ export async function hook(
     return response;
   }
 
+  console.warn(
+    `[@octokit/auth-oauth-app] setting user authentication is deprecated. Use "@octokit/auth-oauth-user" instead`
+  );
+
   const { token } = await getOAuthAccessToken(state, { request });
   endpoint.headers.authorization = `token ${token}`;
 
