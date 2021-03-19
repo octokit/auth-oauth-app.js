@@ -20,17 +20,27 @@ export type StrategyOptions = {
   request?: RequestInterface;
 };
 
-type AuthAppOptions = {
+export type AuthAppOptions = {
   type: "oauth-app";
 };
 export type AuthTokenOptions = {
+  type: "oauth-user";
+  code?: string;
+  redirectUrl?: string;
+  state?: string;
+};
+/** @deprecated type: "token" is deprecated. Use type: "oauth-user" */
+export type DeprecatedAuthTokenOptions = {
   type: "token";
   code?: string;
   redirectUrl?: string;
   state?: string;
 };
 
-export type AuthOptions = AuthAppOptions | AuthTokenOptions;
+export type AuthOptions =
+  | AuthAppOptions
+  | AuthTokenOptions
+  | DeprecatedAuthTokenOptions;
 
 export type TokenWithScopes = {
   token: string;
@@ -53,3 +63,12 @@ export type State = StrategyOptions & {
   request: RequestInterface;
   token?: TokenWithScopes;
 };
+export interface OAuthAppAuthInterface {
+  (options?: AuthOptions): Promise<Authentication>;
+
+  hook(
+    request: OctokitTypes.RequestInterface,
+    route: OctokitTypes.Route | OctokitTypes.EndpointOptions,
+    parameters?: OctokitTypes.RequestParameters
+  ): Promise<OctokitTypes.OctokitResponse<any>>;
+}

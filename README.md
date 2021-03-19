@@ -15,8 +15,8 @@ It implements authentication using an OAuth app’s client ID and secret as well
 - [`createOAuthAppAuth(options)`](#createoauthappauthoptions)
 - [`auth(options)`](#authoptions)
 - [Authentication object](#authentication-object)
-    - [OAuth authentication](#oauth-authentication)
-    - [OAuth access token authentication](#oauth-access-token-authentication)
+  - [OAuth authentication](#oauth-authentication)
+  - [OAuth access token authentication](#oauth-access-token-authentication)
 - [`auth.hook(request, route, parameters)` or `auth.hook(request, options)`](#authhookrequest-route-parameters-or-authhookrequest-options)
 - [Implementation details](#implementation-details)
 - [License](#license)
@@ -76,8 +76,8 @@ const appAuthentication = await auth({
 //   }
 // }
 
-const tokenAuthentication = await auth({
-  type: "token",
+const userAuthentication = await auth({
+  type: "oauth-user",
   code: "random123", // code from OAuth web flow, see https://git.io/fhd1D
   state: "mystate123",
 });
@@ -216,7 +216,7 @@ The async `auth()` method returned by `createOAuthAppAuth(options)` accepts the 
         <code>string</code>
       </th>
       <td>
-        <strong>Required.</strong> Either <code>"oauth-app"</code> or <code>"token"</code>.
+        <strong>Required.</strong> Either <code>"oauth-app"</code> or <code>"oauth-user"</code>.
       </td>
     </tr>
     <tr>
