@@ -29,18 +29,8 @@ export type AuthTokenOptions = {
   redirectUrl?: string;
   state?: string;
 };
-/** @deprecated type: "token" is deprecated. Use type: "oauth-user" */
-export type DeprecatedAuthTokenOptions = {
-  type: "token";
-  code?: string;
-  redirectUrl?: string;
-  state?: string;
-};
 
-export type AuthOptions =
-  | AuthAppOptions
-  | AuthTokenOptions
-  | DeprecatedAuthTokenOptions;
+export type AuthOptions = AuthAppOptions | AuthTokenOptions;
 
 export type TokenWithScopes = {
   token: string;

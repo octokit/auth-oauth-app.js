@@ -2,7 +2,6 @@ import { RequestError } from "@octokit/request-error";
 
 import {
   AuthTokenOptions,
-  DeprecatedAuthTokenOptions,
   RequestInterface,
   State,
   TokenWithScopes,
@@ -12,7 +11,7 @@ export async function getOAuthAccessToken(
   state: State,
   options: {
     request?: RequestInterface;
-    auth?: AuthTokenOptions | DeprecatedAuthTokenOptions;
+    auth?: AuthTokenOptions;
   }
 ): Promise<TokenWithScopes> {
   const authOptionsPassed = options.auth
