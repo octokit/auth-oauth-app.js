@@ -1,6 +1,6 @@
 import btoa from "btoa-lite";
+import { exchangeWebFlowCode } from "@octokit/oauth-methods";
 
-import { getOAuthAccessToken } from "./get-oauth-access-token";
 import {
   State,
   AuthAppOptions,
@@ -23,8 +23,16 @@ export async function auth(
   authOptions: AuthAppOptions | AuthTokenOptions
 ): Promise<Authentication> {
   if (authOptions.type === "oauth-user") {
-    const { token, scopes } = await getOAuthAccessToken(state, {
-      auth: authOptions,
+    const {
+      authentication: { token, scopes },
+    } = await exchangeWebFlowCode({
+      clientType: "oauth-app",
+      clientId: state.clientId,
+      clientSecret: state.clientSecret,
+      code: authOptions.code,
+      state: authOptions.state,
+      redirectUrl: authOptions.redirectUrl,
+      request: state.request,
     });
 
     return {
