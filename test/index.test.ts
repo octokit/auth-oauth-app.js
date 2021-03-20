@@ -17,6 +17,7 @@ test("README example with type: 'oauth-app'", async () => {
     type: "oauth-app",
     clientId: "123",
     clientSecret: "secret",
+    clientType: "oauth-app",
     headers: {
       authorization: "basic MTIzOnNlY3JldA==", // btoa('123:secret')
     },
@@ -66,10 +67,66 @@ test("README example with `type: 'oauth-user'`", async () => {
   });
 
   expect(authentication).toEqual({
+    clientId: "123",
+    clientSecret: "secret",
+    clientType: "oauth-app",
     type: "token",
     tokenType: "oauth",
     token: "secret123",
     scopes: [],
+  });
+});
+
+test("GitHub App", async () => {
+  const mock = fetchMock.sandbox().postOnce(
+    "https://github.com/login/oauth/access_token",
+    {
+      access_token: "secret123",
+      scope: "",
+      token_type: "bearer",
+    },
+    {
+      headers: {
+        accept: "application/json",
+        "user-agent": "test",
+        "content-type": "application/json; charset=utf-8",
+      },
+      body: {
+        client_id: "lv1.1234567890abcdef",
+        client_secret: "1234567890abcdef1234567890abcdef12345678",
+        code: "random123",
+        state: "mystate123",
+      },
+    }
+  );
+
+  const auth = createOAuthAppAuth({
+    clientId: "lv1.1234567890abcdef",
+    clientSecret: "1234567890abcdef1234567890abcdef12345678",
+    clientType: "github-app",
+    request: request.defaults({
+      headers: {
+        "user-agent": "test",
+      },
+      request: {
+        fetch: mock,
+      },
+    }),
+  });
+
+  const authentication = await auth({
+    type: "oauth-user",
+    code: "random123",
+    state: "mystate123",
+  });
+
+  expect(authentication).toEqual({
+    clientId: "lv1.1234567890abcdef",
+    clientSecret: "1234567890abcdef1234567890abcdef12345678",
+    clientType: "github-app",
+    type: "token",
+    tokenType: "oauth",
+    token: "secret123",
   });
 });
 
@@ -116,6 +173,9 @@ test("request with custom baseUrl (GHE)", async () => {
 
   expect(authentication).toMatchInlineSnapshot(`
     Object {
+      "clientId": "123",
+      "clientSecret": "secret",
+      "clientType": "oauth-app",
       "scopes": Array [],
       "token": "secret123",
       "tokenType": "oauth",

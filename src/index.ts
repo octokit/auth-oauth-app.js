@@ -4,22 +4,24 @@ import { request } from "@octokit/request";
 import { auth } from "./auth";
 import { hook } from "./hook";
 import {
-  StrategyOptions,
-  AuthOptions,
-  Authentication,
+  OAuthAppStrategyOptions,
+  GitHubAppStrategyOptions,
   OAuthAppAuthInterface,
+  GitHubAuthInterface,
 } from "./types";
 import { VERSION } from "./version";
 
-export type Types = {
-  StrategyOptions: StrategyOptions;
-  AuthOptions: AuthOptions;
-  Authentication: Authentication;
-};
+export function createOAuthAppAuth(
+  options: OAuthAppStrategyOptions
+): OAuthAppAuthInterface;
 
 export function createOAuthAppAuth(
-  options: StrategyOptions
-): OAuthAppAuthInterface {
+  options: GitHubAppStrategyOptions
+): GitHubAuthInterface;
+
+export function createOAuthAppAuth(
+  options: OAuthAppStrategyOptions | GitHubAppStrategyOptions
+): OAuthAppAuthInterface | GitHubAuthInterface {
   const state = Object.assign(
     {
       request: request.defaults({
@@ -27,12 +29,14 @@ export function createOAuthAppAuth(
           "user-agent": `octokit-auth-oauth-app.js/${VERSION} ${getUserAgent()}`,
         },
       }),
+      clientType: "oauth-app",
     },
     options
   );
 
-  // @ts-expect-error not worth the extra code to appease TypeScript
+  // @ts-expect-error not worth the extra code to appease TS
   return Object.assign(auth.bind(null, state), {
+    // @ts-expect-error not worth the extra code to appease TS
     hook: hook.bind(null, state),
   });
 }

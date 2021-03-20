@@ -9,10 +9,10 @@ import {
   OctokitResponse,
 } from "@octokit/types";
 
-import { State } from "./types";
+import { OAuthAppState, GitHubAppState } from "./types";
 
 export async function hook(
-  state: State,
+  state: OAuthAppState | GitHubAppState,
   request: RequestInterface,
   route: Route | EndpointOptions,
   parameters?: RequestParameters
