@@ -15,8 +15,10 @@ It implements authentication using an OAuth app’s client ID and secret as well
 - [`createOAuthAppAuth(options)`](#createoauthappauthoptions)
 - [`auth(options)`](#authoptions)
 - [Authentication object](#authentication-object)
-  - [OAuth authentication](#oauth-authentication)
-  - [OAuth access token authentication](#oauth-access-token-authentication)
+  - [OAuth App authentication](#oauth-app-authentication)
+  - [OAuth user access token authentication](#oauth-user-access-token-authentication)
+  - [GitHub APP user authentication token with expiring disabled](#github-app-user-authentication-token-with-expiring-disabled)
+  - [GitHub APP user authentication token with expiring enabled](#github-app-user-authentication-token-with-expiring-enabled)
 - [`auth.hook(request, route, parameters)` or `auth.hook(request, options)`](#authhookrequest-route-parameters-or-authhookrequest-options)
 - [Implementation details](#implementation-details)
 - [License](#license)
@@ -51,8 +53,9 @@ const { createOAuthAppAuth } = require("@octokit/auth-oauth-app");
 
 ```js
 const auth = createOAuthAppAuth({
-  clientId: "123",
-  clientSecret: "secret",
+  clientType: "oauth-app",
+  clientId: "1234567890abcdef1234",
+  clientSecret: "1234567890abcdef1234567890abcdef12345678",
 });
 
 // OAuth Apps authenticate using Basic auth, where
@@ -63,8 +66,8 @@ const appAuthentication = await auth({
 // resolves with
 // {
 //   type: 'oauth-app',
-//   clientId: '123',
-//   clientSecret: 'secret',
+//   clientId: '1234567890abcdef1234',
+//   clientSecret: '1234567890abcdef1234567890abcdef12345678',
 //   headers: {
 //     authorization: 'basic MTIzOnNlY3JldA=='
 //   }
@@ -127,6 +130,17 @@ The `createOAuthAppAuth` method accepts a single `options` parameter
     </tr>
     <tr>
       <th>
+        <code>options.clientType</code>
+      </th>
+      <th>
+        <code>string</code>
+      </th>
+      <td>
+        Must be set to either <code>"oauth-app"</code> or <code>"github-app"</code>. Defaults to <code>"oauth-app"</code>
+      </td>
+    </tr>
+    <tr>
+      <th>
         <code>options.request</code>
       </th>
       <th>
@@ -138,8 +152,8 @@ The `createOAuthAppAuth` method accepts a single `options` parameter
 ```js
 const { request } = require("@octokit/request");
 createOAuthAppAuth({
-  clientId: 123,
-  clientSecret: "secret",
+  clientId: "1234567890abcdef1234",
+  clientSecret: "1234567890abcdef1234567890abcdef12345678",
   request: request.defaults({
     baseUrl: "https://ghe.my-company.com/api/v3",
   }),
@@ -193,6 +207,17 @@ The async `auth()` method returned by `createOAuthAppAuth(options)` accepts the 
     </tr>
     <tr>
       <th>
+        <code>options.scopes</code>
+      </th>
+      <th>
+        <code>array of strings</code>
+      </th>
+      <td>
+        Only relevant if <code>options.type</code> is set to <code>"oauth-user"</code> and <code>clientType</code> strategy option is set to <code>"oauth-app"</code>
+      </td>
+    </tr>
+    <tr>
+      <th>
         <code>options.redirectUrl</code>
       </th>
       <th>
@@ -218,12 +243,14 @@ The async `auth()` method returned by `createOAuthAppAuth(options)` accepts the 
 
 ## Authentication object
 
-The async `auth(options)` method to one of two possible authentication objects
+The async `auth(options)` method to one of four possible authentication objects
 
-1. **OAuth authentication** if `clientId` and `clientSecret` options were passed.
-2. **OAuth access token authentication** if `code` option was passed.
+1. **OAuth App authentication** for `auth({ type: "oauth-app" })`
+2. **OAuth user access token authentication** for `auth({ type: "oauth-app" })` and App is an OAuth App (OAuth user access token)
+3. **GitHub APP user authentication token with expiring disabled** for `auth({ type: "oauth-app" })` and App is a GitHub App (user-to-server token)
+4. **GitHub APP user authentication token with expiring enabled** for `auth({ type: "oauth-app" })` and App is a GitHub App (user-to-server token)
 
-#### OAuth authentication
+#### OAuth App authentication
 
 <table width="100%">
   <thead align=left>
@@ -287,7 +314,7 @@ The async `auth(options)` method to one of two possible authentication objects
   </tbody>
 </table>
 
-#### OAuth access token authentication
+#### OAuth user access token authentication
 
 <table width="100%">
   <thead align=left>
@@ -317,13 +344,99 @@ The async `auth(options)` method to one of two possible authentication objects
     </tr>
     <tr>
       <th>
+        <code>tokenType</code>
+      </th>
+      <th>
+        <code>string</code>
+      </th>
+      <td>
+        <code>"oauth"</code>
+      </td>
+    </tr>
+    <tr>
+      <th>
+        <code>clientType</code>
+      </th>
+      <th>
+        <code>string</code>
+      </th>
+      <td>
+        <code>"oauth-app"</code>
+      </td>
+    </tr>
+    <tr>
+      <th>
+        <code>clientId</code>
+      </th>
+      <th>
+        <code>string</code>
+      </th>
+      <td>
+        The <code>clientId</code> from the strategy options
+      </td>
+    </tr>
+    <tr>
+      <th>
+        <code>clientSecret</code>
+      </th>
+      <th>
+        <code>string</code>
+      </th>
+      <td>
+        The <code>clientSecret</code> from the strategy options
+      </td>
+    </tr>
+    <tr>
+      <th>
         <code>token</code>
       </th>
       <th>
         <code>string</code>
       </th>
       <td>
-        The personal access token
+        The user access token
+      </td>
+    </tr>
+    <tr>
+      <th>
+        <code>scopes</code>
+      </th>
+      <th>
+        <code>array of strings</code>
+      </th>
+      <td>
+        array of scope names enabled for the token
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+### GitHub APP user authentication token with expiring disabled
+
+<table width="100%">
+  <thead align=left>
+    <tr>
+      <th width=150>
+        name
+      </th>
+      <th width=70>
+        type
+      </th>
+      <th>
+        description
+      </th>
+    </tr>
+  </thead>
+  <tbody align=left valign=top>
+    <tr>
+      <th>
+        <code>type</code>
+      </th>
+      <th>
+        <code>string</code>
+      </th>
+      <td>
+        <code>"token"</code>
       </td>
     </tr>
     <tr>
@@ -339,13 +452,165 @@ The async `auth(options)` method to one of two possible authentication objects
     </tr>
     <tr>
       <th>
-        <code>scopes</code>
+        <code>clientType</code>
       </th>
       <th>
-        <code>array of strings</code>
+        <code>string</code>
       </th>
       <td>
-        array of scope names enabled for the token
+        <code>"github-app"</code>
+      </td>
+    </tr>
+    <tr>
+      <th>
+        <code>clientId</code>
+      </th>
+      <th>
+        <code>string</code>
+      </th>
+      <td>
+        The app's <code>Client ID</code>
+      </td>
+    </tr>
+    <tr>
+      <th>
+        <code>clientSecret</code>
+      </th>
+      <th>
+        <code>string</code>
+      </th>
+      <td>
+        One of the app's client secrets
+      </td>
+    </tr>
+    <tr>
+      <th>
+        <code>token</code>
+      </th>
+      <th>
+        <code>string</code>
+      </th>
+      <td>
+        The user access token
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+### GitHub APP user authentication token with expiring enabled
+
+<table width="100%">
+  <thead align=left>
+    <tr>
+      <th width=150>
+        name
+      </th>
+      <th width=70>
+        type
+      </th>
+      <th>
+        description
+      </th>
+    </tr>
+  </thead>
+  <tbody align=left valign=top>
+    <tr>
+      <th>
+        <code>type</code>
+      </th>
+      <th>
+        <code>string</code>
+      </th>
+      <td>
+        <code>"token"</code>
+      </td>
+    </tr>
+    <tr>
+      <th>
+        <code>tokenType</code>
+      </th>
+      <th>
+        <code>string</code>
+      </th>
+      <td>
+        <code>"oauth"</code>
+      </td>
+    </tr>
+    <tr>
+      <th>
+        <code>clientType</code>
+      </th>
+      <th>
+        <code>string</code>
+      </th>
+      <td>
+        <code>"github-app"</code>
+      </td>
+    </tr>
+    <tr>
+      <th>
+        <code>clientId</code>
+      </th>
+      <th>
+        <code>string</code>
+      </th>
+      <td>
+        The app's <code>Client ID</code>
+      </td>
+    </tr>
+    <tr>
+      <th>
+        <code>clientSecret</code>
+      </th>
+      <th>
+        <code>string</code>
+      </th>
+      <td>
+        One of the app's client secrets
+      </td>
+    </tr>
+    <tr>
+      <th>
+        <code>token</code>
+      </th>
+      <th>
+        <code>string</code>
+      </th>
+      <td>
+        The user access token
+      </td>
+    </tr>
+    <tr>
+      <th>
+        <code>refreshToken</code>
+      </th>
+      <th>
+        <code>string</code>
+      </th>
+      <td>
+        The refresh token
+      </td>
+    </tr>
+    <tr>
+      <th>
+        <code>expiresAt</code>
+      </th>
+      <th>
+        <code>string</code>
+      </th>
+      <td>
+        Date timestamp in <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toISOString">ISO 8601</a> standard. Example: <code>2022-01-01T08:00:0.000Z</code>
+      </td>
+    </tr>
+    <tr>
+      <th>
+        <code>refreshTokenExpiresAt</code>
+      </th>
+      <th>
+        <code>string</code>
+      </th>
+      <td>
+        Date timestamp in <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toISOString">ISO 8601</a> standard. Example: <code>2021-07-01T00:00:0.000Z</code>
       </td>
     </tr>
   </tbody>
@@ -364,7 +629,7 @@ const { data: user } = await auth.hook(
   request,
   "POST /applications/{client_id}/token",
   {
-    client_id: "123",
+    client_id: "1234567890abcdef1234",
     access_token: "token123",
   }
 );
@@ -382,7 +647,7 @@ const requestWithAuth = request.defaults({
 const { data: user } = await requestWithAuth(
   "POST /applications/{client_id}/token",
   {
-    client_id: "123",
+    client_id: "1234567890abcdef1234",
     access_token: "token123",
   }
 );
@@ -399,7 +664,7 @@ To reset the cached access token, you can do this
 ```js
 const { token } = await auth({ type: "oauth-user" });
 await auth.hook(request, "POST /applications/{client_id}/token", {
-  client_id: "123",
+  client_id: "1234567890abcdef1234",
   access_token: token,
 });
 ```
