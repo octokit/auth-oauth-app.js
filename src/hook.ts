@@ -1,22 +1,22 @@
 import btoa from "btoa-lite";
 import { requiresBasicAuth } from "@octokit/auth-oauth-user";
-
 import {
-  AnyResponse,
+  EndpointDefaults,
   EndpointOptions,
   RequestParameters,
-  RequestInterface,
   Route,
-  State,
-} from "./types";
-import { EndpointDefaults } from "@octokit/types";
+  RequestInterface,
+  OctokitResponse,
+} from "@octokit/types";
+
+import { State } from "./types";
 
 export async function hook(
   state: State,
   request: RequestInterface,
   route: Route | EndpointOptions,
   parameters?: RequestParameters
-): Promise<AnyResponse> {
+): Promise<OctokitResponse<any>> {
   let endpoint = request.endpoint.merge(
     route as string,
     parameters
