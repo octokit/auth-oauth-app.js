@@ -218,7 +218,7 @@ const userOctokit = await appOctokit.auth({
   type: "oauth-user",
   code: "code123",
   factor: (options) => {
-    new Octokit({
+    return new Octokit({
       authStrategy: createOAuthUserAuth,
       auth: options,
     });
