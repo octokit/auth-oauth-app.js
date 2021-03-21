@@ -7,13 +7,16 @@
 
 `@octokit/auth-oauth-app` is implementing one of [GitHub’s authentication strategies](https://github.com/octokit/auth.js).
 
-It implements authentication using an OAuth app’s client ID and secret as well as OAuth access tokens in exchange for a `code` from the [web application flow](https://developer.github.com/apps/building-oauth-apps/authorizing-oauth-apps/#web-application-flow).
+It implements authentication using an OAuth app’s client ID and secret as well as creating user access tokens GitHub's OAuth [web application flow](https://developer.github.com/apps/building-oauth-apps/authorizing-oauth-apps/#web-application-flow) and [device flow](https://docs.github.com/en/developers/apps/authorizing-oauth-apps#device-flow).
 
 <!-- toc -->
 
 - [Usage](#usage)
 - [`createOAuthAppAuth(options)`](#createoauthappauthoptions)
 - [`auth(options)`](#authoptions)
+  - [Client ID/Client Server Basic authentication](#client-idclient-server-basic-authentication)
+  - [OAuth web flow](#oauth-web-flow)
+  - [OAuth device flow](#oauth-device-flow)
 - [Authentication object](#authentication-object)
   - [OAuth App authentication](#oauth-app-authentication)
   - [OAuth user access token authentication](#oauth-user-access-token-authentication)
@@ -73,18 +76,42 @@ const appAuthentication = await auth({
 //   }
 // }
 
-const userAuthentication = await auth({
+// Exchange code from GitHub's OAuth web flow
+// see https://docs.github.com/en/developers/apps/authorizing-oauth-apps#2-users-are-redirected-back-to-your-site-by-github
+const userAuthenticationFromWebFlow = await auth({
   type: "oauth-user",
-  code: "random123", // code from OAuth web flow, see https://git.io/fhd1D
+  code: "random123",
   state: "mystate123",
 });
 // resolves with
 // {
+//   clientType: 'oauth-app',
+//   clientId: '1234567890abcdef1234',
+//   clientSecret: '1234567890abcdef1234567890abcdef12345678',
 //   type: 'token',
 //   tokenType: 'oauth',
 //   token: '...', /* the created oauth token */
 //   scopes: [] /* depend on request scopes by OAuth app */
 // }
+
+// Create user access token using the device flow
+// see https://docs.github.com/en/developers/apps/authorizing-oauth-apps#2-users-are-redirected-back-to-your-site-by-github
+const userAuthenticationFromDeviceFlow = auth({
+  onVerification(verification) {
+    // verification example
+    // {
+    //   device_code: "3584d83530557fdd1f46af8289938c8ef79f9dc5",
+    //   user_code: "WDJB-MJHT",
+    //   verification_uri: "https://github.com/login/device",
+    //   expires_in: 900,
+    //   interval: 5,
+    // };
+
+    console.log("Open %s", verification.verification_uri);
+    console.log("Enter code: %s", verification.user_code);
+  },
+});
+// resolves with same properties as userAuthenticationFromWebFlow above
 ```
 
 ## `createOAuthAppAuth(options)`
@@ -166,7 +193,11 @@ createOAuthAppAuth({
 
 ## `auth(options)`
 
-The async `auth()` method returned by `createOAuthAppAuth(options)` accepts the following options
+The async `auth()` method returned by `createOAuthAppAuth(options)` accepts different options depending on your use case
+
+### Client ID/Client Server Basic authentication
+
+All REST API routes starting with `/applications/{client_id}` need to be authenticated using the OAuth/GitHub App's Client ID and a client secret.
 
 <table width="100%">
   <thead align=left>
@@ -191,7 +222,40 @@ The async `auth()` method returned by `createOAuthAppAuth(options)` accepts the 
         <code>string</code>
       </th>
       <td>
-        <strong>Required.</strong> Either <code>"oauth-app"</code> or <code>"oauth-user"</code>.
+        <strong>Required.</strong> Must be set to <code>"oauth-app"</code>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+### OAuth web flow
+
+Exchange `code` for a user access token. See [Web application flow](https://docs.github.com/en/developers/apps/authorizing-oauth-apps#web-application-flow).
+
+<table width="100%">
+  <thead align=left>
+    <tr>
+      <th width=150>
+        name
+      </th>
+      <th width=70>
+        type
+      </th>
+      <th>
+        description
+      </th>
+    </tr>
+  </thead>
+  <tbody align=left valign=top>
+    <tr>
+      <th>
+        <code>options.type</code>
+      </th>
+      <th>
+        <code>string</code>
+      </th>
+      <td>
+        <strong>Required.</strong> Must be set to <code>"oauth-user"</code>.
       </td>
     </tr>
     <tr>
@@ -202,7 +266,7 @@ The async `auth()` method returned by `createOAuthAppAuth(options)` accepts the 
         <code>string</code>
       </th>
       <td>
-        <strong>Required if <code>options.type</code> is set to <code>"oauth-user"</code></strong>. The authorization <code>code</code> which was passed as query parameter to the callback URL from the <a href="https://developer.github.com/apps/building-oauth-apps/authorizing-oauth-apps/#2-users-are-redirected-back-to-your-site-by-github">OAuth web application flow</a>.
+        <strong>Required</strong>. The authorization <code>code</code> which was passed as query parameter to the callback URL from the <a href="https://developer.github.com/apps/building-oauth-apps/authorizing-oauth-apps/#2-users-are-redirected-back-to-your-site-by-github">OAuth web application flow</a>.
       </td>
     </tr>
     <tr>
@@ -213,7 +277,7 @@ The async `auth()` method returned by `createOAuthAppAuth(options)` accepts the 
         <code>string</code>
       </th>
       <td>
-        Only relevant if <code>options.type</code> is set to <code>"oauth-user"</code>. The URL in your application where users are sent after authorization. See <a href="https://developer.github.com/apps/building-oauth-apps/authorizing-oauth-apps/#redirect-urls">redirect urls</a>. 
+        The URL in your application where users are sent after authorization. See <a href="https://developer.github.com/apps/building-oauth-apps/authorizing-oauth-apps/#redirect-urls">redirect urls</a>. 
       </td>
     </tr>
     <tr>
@@ -224,7 +288,80 @@ The async `auth()` method returned by `createOAuthAppAuth(options)` accepts the 
         <code>string</code>
       </th>
       <td>
-        Only relevant if <code>options.type</code> is set to <code>"oauth-user"</code>. The unguessable random string you provided in Step 1 of the <a href="https://developer.github.com/apps/building-oauth-apps/authorizing-oauth-apps/#2-users-are-redirected-back-to-your-site-by-github">OAuth web application flow</a>.
+        The unguessable random string you provided in Step 1 of the <a href="https://developer.github.com/apps/building-oauth-apps/authorizing-oauth-apps/#2-users-are-redirected-back-to-your-site-by-github">OAuth web application flow</a>.
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+### OAuth device flow
+
+Create a user access token without an http redirect. See [Device flow](https://docs.github.com/en/developers/apps/authorizing-oauth-apps#device-flow).
+
+The device flow does not require a client secret, but it is required as strategy option for `@octokit/auth-oauth-app`, even for the device flow. If you want to implement the device flow without requiring a client secret, use [`@octokit/auth-oauth-device`](https://github.com/octokit/auth-oauth-device.js#readme).
+
+<table width="100%">
+  <thead align=left>
+    <tr>
+      <th width=150>
+        name
+      </th>
+      <th width=70>
+        type
+      </th>
+      <th>
+        description
+      </th>
+    </tr>
+  </thead>
+  <tbody align=left valign=top>
+    <tr>
+      <th>
+        <code>options.type</code>
+      </th>
+      <th>
+        <code>string</code>
+      </th>
+      <td>
+        <strong>Required.</strong> Must be set to <code>"oauth-user"</code>.
+      </td>
+    </tr>
+    <tr>
+      <th>
+        <code>onVerification</code>
+      </th>
+      <th>
+        <code>function</code>
+      </th>
+      <td>
+
+**Required**. A function that is called once the device and user codes were retrieved
+
+The `onVerification()` callback can be used to pause until the user completes step 2, which might result in a better user experience.
+
+```js
+const auth = auth({
+  type: "oauth-user",
+  onVerification(verification) {
+    console.log("Open %s", verification.verification_uri);
+    console.log("Enter code: %s", verification.user_code);
+
+    await prompt("press enter when you are ready to continue")
+  },
+});
+```
+
+</td>
+    </tr>
+    <tr>
+      <th>
+        <code>scopes</code>
+      </th>
+      <th>
+        <code>array of strings</code>
+      </th>
+      <td>
+        Only relevant if the <code>clientType</code> strategy option is set to <code>"oauth-app"</code>.Array of OAuth scope names that the user access token should be granted. Defaults to no scopes (<code>[]</code>).
       </td>
     </tr>
   </tbody>

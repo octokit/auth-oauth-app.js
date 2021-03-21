@@ -7,6 +7,7 @@ import {
 } from "@octokit/types";
 
 import * as AuthOAuthUser from "@octokit/auth-oauth-user";
+import * as DeviceTypes from "@octokit/auth-oauth-device";
 
 export type ClientType = "oauth-app" | "github-app";
 
@@ -36,6 +37,15 @@ export type WebFlowAuthOptions = {
   redirectUrl?: string;
   state?: string;
 };
+export type OAuthAppDeviceFlowAuthOptions = {
+  type: "oauth-user";
+  onVerification: DeviceTypes.OAuthAppStrategyOptions["onVerification"];
+  scopes?: string[];
+};
+export type GitHubDeviceFlowAuthOptions = {
+  type: "oauth-user";
+  onVerification: DeviceTypes.OAuthAppStrategyOptions["onVerification"];
+};
 
 // AUTHENTICATION OBJECT
 
@@ -54,9 +64,12 @@ export type GitHubAppUserAuthentication = AuthOAuthUser.GitHubAppAuthentication;
 export type GitHubAppUserAuthenticationWithExpiration = AuthOAuthUser.GitHubAppAuthenticationWithExpiration;
 
 export interface OAuthAppAuthInterface {
-  (options?: AppAuthOptions | WebFlowAuthOptions): Promise<
-    AppAuthentication | OAuthAppUserAuthentication
-  >;
+  (
+    options?:
+      | AppAuthOptions
+      | WebFlowAuthOptions
+      | OAuthAppDeviceFlowAuthOptions
+  ): Promise<AppAuthentication | OAuthAppUserAuthentication>;
 
   hook(
     request: RequestInterface,
@@ -66,7 +79,9 @@ export interface OAuthAppAuthInterface {
 }
 
 export interface GitHubAuthInterface {
-  (options?: AppAuthOptions | WebFlowAuthOptions): Promise<
+  (
+    options?: AppAuthOptions | WebFlowAuthOptions | GitHubDeviceFlowAuthOptions
+  ): Promise<
     | AppAuthentication
     | GitHubAppUserAuthentication
     | GitHubAppUserAuthenticationWithExpiration

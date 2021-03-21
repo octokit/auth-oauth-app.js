@@ -1,9 +1,9 @@
-import fetchMock, { MockMatcherFunction } from "fetch-mock";
+import fetchMock from "fetch-mock";
 import { request } from "@octokit/request";
 
 import { createOAuthAppAuth } from "../src/index";
 
-test("README example with type: 'oauth-app'", async () => {
+test("README example with {type: 'oauth-app'}", async () => {
   const auth = createOAuthAppAuth({
     clientId: "123",
     clientSecret: "secret",
@@ -24,7 +24,7 @@ test("README example with type: 'oauth-app'", async () => {
   });
 });
 
-test("README example with `type: 'oauth-user'`", async () => {
+test("README web flow example", async () => {
   const mock = fetchMock.sandbox().postOnce(
     "https://github.com/login/oauth/access_token",
     {
@@ -74,6 +74,92 @@ test("README example with `type: 'oauth-user'`", async () => {
     tokenType: "oauth",
     token: "secret123",
     scopes: [],
+  });
+});
+
+test("README device flow example", async () => {
+  const mock = fetchMock
+    .sandbox()
+
+    .postOnce(
+      "https://github.com/login/device/code",
+      {
+        device_code: "devicecode123",
+        user_code: "usercode123",
+        verification_uri: "https://github.com/login/device",
+        expires_in: 900,
+        // use low number because jest.useFakeTimers() & jest.runAllTimers() didn't work for me
+        interval: 0.005,
+      },
+      {
+        headers: {
+          accept: "application/json",
+          "user-agent": "test",
+          "content-type": "application/json; charset=utf-8",
+        },
+        body: {
+          client_id: "1234567890abcdef1234",
+          scope: "",
+        },
+      }
+    )
+    .postOnce(
+      "https://github.com/login/oauth/access_token",
+      {
+        access_token: "token123",
+        scope: "",
+      },
+      {
+        headers: {
+          accept: "application/json",
+          "user-agent": "test",
+          "content-type": "application/json; charset=utf-8",
+        },
+        body: {
+          client_id: "1234567890abcdef1234",
+          device_code: "devicecode123",
+          grant_type: "urn:ietf:params:oauth:grant-type:device_code",
+        },
+        overwriteRoutes: false,
+      }
+    );
+
+  const auth = createOAuthAppAuth({
+    clientId: "1234567890abcdef1234",
+    clientSecret: "secret",
+    // pass request mock for testing
+    request: request.defaults({
+      headers: {
+        "user-agent": "test",
+      },
+      request: {
+        fetch: mock,
+      },
+    }),
+  });
+
+  const onVerification = jest.fn();
+  const authentication = await auth({
+    type: "oauth-user",
+    onVerification,
+  });
+
+  expect(authentication).toEqual({
+    type: "token",
+    tokenType: "oauth",
+    clientType: "oauth-app",
+    clientId: "1234567890abcdef1234",
+    clientSecret: "secret",
+    token: "token123",
+    scopes: [],
+  });
+
+  expect(onVerification).toHaveBeenCalledWith({
+    device_code: "devicecode123",
+    expires_in: 900,
+    interval: 0.005,
+    user_code: "usercode123",
+    verification_uri: "https://github.com/login/device",
   });
 });
 
