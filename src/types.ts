@@ -1,74 +1,154 @@
-import * as OctokitTypes from "@octokit/types";
+import {
+  EndpointOptions,
+  RequestParameters,
+  Route,
+  RequestInterface,
+  OctokitResponse,
+} from "@octokit/types";
 
-export type AnyResponse = OctokitTypes.OctokitResponse<any>;
-export type EndpointDefaults = OctokitTypes.EndpointDefaults;
-export type EndpointOptions = OctokitTypes.EndpointOptions;
-export type RequestParameters = OctokitTypes.RequestParameters;
-export type Route = OctokitTypes.Route;
-export type RequestInterface = OctokitTypes.RequestInterface;
-export type StrategyInterface = OctokitTypes.StrategyInterface<
-  [StrategyOptions],
-  [AuthOptions],
-  Authentication
->;
-export type StrategyOptions = {
+import * as AuthOAuthUser from "@octokit/auth-oauth-user";
+import * as DeviceTypes from "@octokit/auth-oauth-device";
+
+export type ClientType = "oauth-app" | "github-app";
+
+// STRATEGY OPTIONS
+
+export type OAuthAppStrategyOptions = {
+  clientType?: "oauth-app";
   clientId: string;
   clientSecret: string;
-  code?: string;
-  redirectUrl?: string;
-  state?: string;
   request?: RequestInterface;
 };
 
-export type AuthAppOptions = {
+export type GitHubAppStrategyOptions = {
+  clientType: "github-app";
+  clientId: string;
+  clientSecret: string;
+  request?: RequestInterface;
+};
+
+// AUTH OPTIONS
+
+export type AppAuthOptions = {
   type: "oauth-app";
 };
-export type AuthTokenOptions = {
+export type WebFlowAuthOptions = {
   type: "oauth-user";
-  code?: string;
+  code: string;
   redirectUrl?: string;
   state?: string;
 };
-/** @deprecated type: "token" is deprecated. Use type: "oauth-user" */
-export type DeprecatedAuthTokenOptions = {
-  type: "token";
-  code?: string;
-  redirectUrl?: string;
-  state?: string;
+export type OAuthAppDeviceFlowAuthOptions = {
+  type: "oauth-user";
+  onVerification: DeviceTypes.OAuthAppStrategyOptions["onVerification"];
+  scopes?: string[];
+};
+export type GitHubAppDeviceFlowAuthOptions = {
+  type: "oauth-user";
+  onVerification: DeviceTypes.OAuthAppStrategyOptions["onVerification"];
 };
 
-export type AuthOptions =
-  | AuthAppOptions
-  | AuthTokenOptions
-  | DeprecatedAuthTokenOptions;
+// AUTHENTICATION OBJECT
 
-export type TokenWithScopes = {
-  token: string;
-  scopes: string[];
-};
-export type TokenAuthentication = TokenWithScopes & {
-  type: "token";
-  tokenType: "oauth";
-};
-export type appAuthentication = {
+export type AppAuthentication = {
   type: "oauth-app";
   clientId: string;
   clientSecret: string;
+  clientType: ClientType;
   headers: {
     authorization: string;
   };
 };
-export type Authentication = TokenAuthentication | appAuthentication;
-export type State = StrategyOptions & {
-  request: RequestInterface;
-  token?: TokenWithScopes;
-};
+
+export type OAuthAppUserAuthentication = AuthOAuthUser.OAuthAppAuthentication;
+export type GitHubAppUserAuthentication = AuthOAuthUser.GitHubAppAuthentication;
+export type GitHubAppUserAuthenticationWithExpiration = AuthOAuthUser.GitHubAppAuthenticationWithExpiration;
+
+export type FactoryOAuthAppWebFlowOptions = OAuthAppStrategyOptions &
+  Omit<WebFlowAuthOptions, "type"> & { clientType: "oauth-app" };
+export type FactoryOAuthAppDeviceFlowOptions = OAuthAppStrategyOptions &
+  Omit<OAuthAppDeviceFlowAuthOptions, "type"> & { clientType: "oauth-app" };
+export type FactoryGitHubAppWebFlowOptions = GitHubAppStrategyOptions &
+  Omit<WebFlowAuthOptions, "type"> & { clientType: "github-app" };
+export type FactoryGitHubAppDeviceFlowOptions = GitHubAppStrategyOptions &
+  Omit<GitHubAppDeviceFlowAuthOptions, "type"> & {
+    clientType: "github-app";
+  };
+
+export interface FactoryOAuthAppWebFlow<T> {
+  (options: FactoryOAuthAppWebFlowOptions): T;
+}
+export interface FactoryOAuthAppDeviceFlow<T> {
+  (options: FactoryOAuthAppDeviceFlowOptions): T;
+}
+export interface FactoryGitHubWebFlow<T> {
+  (options: FactoryGitHubAppWebFlowOptions): T;
+}
+export interface FactoryGitHubDeviceFlow<T> {
+  (options: FactoryGitHubAppDeviceFlowOptions): T;
+}
+
 export interface OAuthAppAuthInterface {
-  (options?: AuthOptions): Promise<Authentication>;
+  // app auth
+  (options: AppAuthOptions): Promise<AppAuthentication>;
+
+  // user auth with `factory` option
+  <T = unknown>(
+    options: WebFlowAuthOptions & { factory: FactoryOAuthAppWebFlow<T> }
+  ): Promise<T>;
+  <T = unknown>(
+    options: OAuthAppDeviceFlowAuthOptions & {
+      factory: FactoryOAuthAppDeviceFlow<T>;
+    }
+  ): Promise<T>;
+
+  // user auth without `factory` option
+  (options: WebFlowAuthOptions): Promise<OAuthAppUserAuthentication>;
+  (options: OAuthAppDeviceFlowAuthOptions): Promise<OAuthAppUserAuthentication>;
 
   hook(
-    request: OctokitTypes.RequestInterface,
-    route: OctokitTypes.Route | OctokitTypes.EndpointOptions,
-    parameters?: OctokitTypes.RequestParameters
-  ): Promise<OctokitTypes.OctokitResponse<any>>;
+    request: RequestInterface,
+    route: Route | EndpointOptions,
+    parameters?: RequestParameters
+  ): Promise<OctokitResponse<any>>;
 }
+
+export interface GitHubAuthInterface {
+  // app auth
+  (options?: AppAuthOptions): Promise<AppAuthentication>;
+
+  // user auth with `factory` option
+  <T = unknown>(
+    options: WebFlowAuthOptions & { factory: FactoryGitHubWebFlow<T> }
+  ): Promise<T>;
+  <T = unknown>(
+    options: GitHubAppDeviceFlowAuthOptions & {
+      factory: FactoryGitHubDeviceFlow<T>;
+    }
+  ): Promise<T>;
+
+  // user auth without `factory` option
+  (options?: WebFlowAuthOptions): Promise<
+    GitHubAppUserAuthentication | GitHubAppUserAuthenticationWithExpiration
+  >;
+  (options?: GitHubAppDeviceFlowAuthOptions): Promise<
+    GitHubAppUserAuthentication | GitHubAppUserAuthenticationWithExpiration
+  >;
+
+  hook(
+    request: RequestInterface,
+    route: Route | EndpointOptions,
+    parameters?: RequestParameters
+  ): Promise<OctokitResponse<any>>;
+}
+
+//  INTERNAL
+
+export type OAuthAppState = OAuthAppStrategyOptions & {
+  clientType: "oauth-app";
+  request: RequestInterface;
+};
+export type GitHubAppState = OAuthAppStrategyOptions & {
+  clientType: "github-app";
+  request: RequestInterface;
+};

@@ -1,69 +1,42 @@
 import btoa from "btoa-lite";
-
-import { getOAuthAccessToken } from "./get-oauth-access-token";
-import { requiresBasicAuth } from "./requires-basic-auth";
+import { requiresBasicAuth } from "@octokit/auth-oauth-user";
 import {
-  AnyResponse,
+  EndpointDefaults,
   EndpointOptions,
   RequestParameters,
-  RequestInterface,
   Route,
-  State,
-} from "./types";
-import { EndpointDefaults } from "@octokit/types";
+  RequestInterface,
+  OctokitResponse,
+} from "@octokit/types";
+
+import { OAuthAppState, GitHubAppState } from "./types";
 
 export async function hook(
-  state: State,
+  state: OAuthAppState | GitHubAppState,
   request: RequestInterface,
   route: Route | EndpointOptions,
   parameters?: RequestParameters
-): Promise<AnyResponse> {
+): Promise<OctokitResponse<any>> {
   let endpoint = request.endpoint.merge(
     route as string,
     parameters
   ) as EndpointDefaults & { url: string };
 
-  // Do not intercept request to retrieve a new token
-  if (/\/login\/oauth\/access_token$/.test(endpoint.url as string)) {
+  // Do not intercept OAuth Web/Device flow request
+  if (
+    /\/login\/(oauth\/access_token|device\/code)$/.test(endpoint.url as string)
+  ) {
     return request(endpoint);
   }
 
-  if (!state.code || requiresBasicAuth(endpoint.url)) {
-    const credentials = btoa(`${state.clientId}:${state.clientSecret}`);
-    endpoint.headers.authorization = `basic ${credentials}`;
-
-    const response = await request(endpoint);
-
-    // `POST /applications/{client_id}/tokens/{access_token}` (legacy) or
-    // `PATCH /applications/{client_id}/token` resets the passed token
-    // and returns a new one. If that’s the current request then update internal state.
-    // Regex supports both the `{param}` as well as the legacy `:param` notation
-    const isLegacyTokenResetRequest =
-      endpoint.method === "POST" &&
-      /^\/applications\/[:{]?[\w_]+\}?\/tokens\/[:{]?[\w_]+\}?$/.test(
-        endpoint.url
-      );
-    const isTokenResetRequest =
-      endpoint.method === "PATCH" &&
-      /^\/applications\/[:{]?[\w_]+\}?\/token$/.test(endpoint.url);
-
-    if (isLegacyTokenResetRequest || isTokenResetRequest) {
-      state.token = {
-        token: response.data.token,
-        // @ts-ignore figure this out
-        scope: response.data.scopes,
-      };
-    }
-
-    return response;
+  if (!requiresBasicAuth(endpoint.url)) {
+    throw new Error(
+      `[@octokit/auth-oauth-app] "${endpoint.method} ${endpoint.url}" does not support clientId/clientSecret basic authentication. Use @octokit/auth-oauth-user instead.`
+    );
   }
 
-  console.warn(
-    `[@octokit/auth-oauth-app] setting user authentication is deprecated. Use "@octokit/auth-oauth-user" instead`
-  );
+  const credentials = btoa(`${state.clientId}:${state.clientSecret}`);
+  endpoint.headers.authorization = `basic ${credentials}`;
 
-  const { token } = await getOAuthAccessToken(state, { request });
-  endpoint.headers.authorization = `token ${token}`;
-
-  return request(endpoint as EndpointOptions);
+  return await request(endpoint);
 }

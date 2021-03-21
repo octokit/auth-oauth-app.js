@@ -1,61 +1,152 @@
 import btoa from "btoa-lite";
+import { createOAuthUserAuth } from "@octokit/auth-oauth-user";
 
-import { getOAuthAccessToken } from "./get-oauth-access-token";
 import {
-  State,
-  AuthAppOptions,
-  AuthTokenOptions,
-  DeprecatedAuthTokenOptions,
-  Authentication,
+  // state
+  OAuthAppState,
+  GitHubAppState,
+  // auth options
+  AppAuthOptions,
+  WebFlowAuthOptions,
+  OAuthAppDeviceFlowAuthOptions,
+  GitHubAppDeviceFlowAuthOptions,
+  FactoryOAuthAppWebFlow,
+  FactoryOAuthAppDeviceFlow,
+  FactoryGitHubWebFlow,
+  FactoryGitHubDeviceFlow,
+  // authentication options
+  AppAuthentication,
+  OAuthAppUserAuthentication,
+  GitHubAppUserAuthentication,
+  GitHubAppUserAuthenticationWithExpiration,
 } from "./types";
 
+//  App authentication
 export async function auth(
-  state: State,
-  authOptions: AuthAppOptions
-): Promise<Authentication>;
+  state: OAuthAppState | GitHubAppState,
+  authOptions: AppAuthOptions
+): Promise<AppAuthentication>;
 
+// OAuth App Web flow
 export async function auth(
-  state: State,
-  authOptions: AuthTokenOptions
-): Promise<Authentication>;
+  state: OAuthAppState,
+  authOptions: WebFlowAuthOptions
+): Promise<OAuthAppUserAuthentication>;
 
-/**
- * @deprecated `type: "token"` is deprecate. Use `type: "oauth"` instead
- */
-export async function auth(
-  state: State,
-  authOptions: DeprecatedAuthTokenOptions
-): Promise<Authentication>;
+// OAuth App Web flow with `factory` option
+export async function auth<T = unknown>(
+  state: OAuthAppState,
+  authOptions: WebFlowAuthOptions & { factory: FactoryOAuthAppWebFlow<T> }
+): Promise<T>;
 
+// Oauth App Device Flow
 export async function auth(
-  state: State,
-  authOptions: AuthAppOptions | AuthTokenOptions | DeprecatedAuthTokenOptions
-): Promise<Authentication> {
-  if (authOptions.type === "token") {
-    console.warn(
-      `[@octokit/auth-oauth-app] "{type: 'token'}" is deprecated, use "{type: 'oauth-user'}" instead`
-    );
+  state: OAuthAppState,
+  authOptions: OAuthAppDeviceFlowAuthOptions
+): Promise<OAuthAppUserAuthentication>;
+
+// OAuth App Device flow with `factory` option
+export async function auth<T = unknown>(
+  state: OAuthAppState,
+  authOptions: OAuthAppDeviceFlowAuthOptions & {
+    factory: FactoryOAuthAppDeviceFlow<T>;
   }
+): Promise<T>;
 
-  if (authOptions.type === "token" || authOptions.type === "oauth-user") {
-    const { token, scopes } = await getOAuthAccessToken(state, {
-      auth: authOptions,
-    });
+// GitHub App Web flow
+export async function auth(
+  state: GitHubAppState,
+  authOptions: WebFlowAuthOptions
+): Promise<
+  GitHubAppUserAuthentication | GitHubAppUserAuthenticationWithExpiration
+>;
 
+// GitHub App Web flow with `factory` option
+export async function auth<T = unknown>(
+  state: GitHubAppState,
+  authOptions: WebFlowAuthOptions & { factory: FactoryGitHubWebFlow<T> }
+): Promise<T>;
+
+// GitHub App Device Flow
+export async function auth(
+  state: GitHubAppState,
+  authOptions: GitHubAppDeviceFlowAuthOptions
+): Promise<
+  GitHubAppUserAuthentication | GitHubAppUserAuthenticationWithExpiration
+>;
+
+// GitHub App Device flow with `factory` option
+export async function auth<T = unknown>(
+  state: GitHubAppState,
+  authOptions: GitHubAppDeviceFlowAuthOptions & {
+    factory: FactoryGitHubDeviceFlow<T>;
+  }
+): Promise<T>;
+
+export async function auth<T = unknown>(
+  state: OAuthAppState | GitHubAppState,
+  authOptions:
+    | AppAuthOptions
+    | WebFlowAuthOptions
+    | OAuthAppDeviceFlowAuthOptions
+    | GitHubAppDeviceFlowAuthOptions
+    | (WebFlowAuthOptions & { factory: FactoryOAuthAppWebFlow<T> })
+    | (OAuthAppDeviceFlowAuthOptions & {
+        factory: FactoryOAuthAppDeviceFlow<T>;
+      })
+    | (WebFlowAuthOptions & { factory: FactoryGitHubWebFlow<T> })
+    | (GitHubAppDeviceFlowAuthOptions & {
+        factory: FactoryGitHubDeviceFlow<T>;
+      })
+): Promise<
+  | AppAuthentication
+  | OAuthAppUserAuthentication
+  | GitHubAppUserAuthentication
+  | GitHubAppUserAuthenticationWithExpiration
+  | T
+> {
+  if (authOptions.type === "oauth-app") {
     return {
-      type: "token",
-      token,
-      tokenType: "oauth",
-      scopes,
+      type: "oauth-app",
+      clientId: state.clientId,
+      clientSecret: state.clientSecret,
+      clientType: state.clientType,
+      headers: {
+        authorization: `basic ${btoa(
+          `${state.clientId}:${state.clientSecret}`
+        )}`,
+      },
     };
   }
 
-  return {
-    type: "oauth-app",
+  if ("factory" in authOptions) {
+    const { type, ...options } = {
+      ...authOptions,
+      ...state,
+    };
+
+    // @ts-expect-error TODO: `option` cannot be never, is this a bug?
+    return authOptions.factory(options);
+  }
+
+  const common = {
     clientId: state.clientId,
     clientSecret: state.clientSecret,
-    headers: {
-      authorization: `basic ${btoa(`${state.clientId}:${state.clientSecret}`)}`,
-    },
+    request: state.request,
+    ...authOptions,
   };
+
+  // TS: Look what you made me do
+  const userAuth =
+    state.clientType === "oauth-app"
+      ? await createOAuthUserAuth({
+          ...common,
+          clientType: state.clientType,
+        })
+      : await createOAuthUserAuth({
+          ...common,
+          clientType: state.clientType,
+        });
+
+  return userAuth();
 }

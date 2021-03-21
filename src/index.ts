@@ -4,36 +4,41 @@ import { request } from "@octokit/request";
 import { auth } from "./auth";
 import { hook } from "./hook";
 import {
-  StrategyOptions,
-  AuthOptions,
-  Authentication,
+  OAuthAppStrategyOptions,
+  GitHubAppStrategyOptions,
   OAuthAppAuthInterface,
+  GitHubAuthInterface,
 } from "./types";
 import { VERSION } from "./version";
 
-export type Types = {
-  StrategyOptions: StrategyOptions;
-  AuthOptions: AuthOptions;
-  Authentication: Authentication;
-};
-
-const deprecatedStrategyOptions = ["code", "redirectUrl", "state"];
+export {
+  // strategy
+  OAuthAppStrategyOptions,
+  GitHubAppStrategyOptions,
+  // auth
+  AppAuthOptions,
+  WebFlowAuthOptions,
+  OAuthAppDeviceFlowAuthOptions,
+  GitHubAppDeviceFlowAuthOptions,
+  // authentication object
+  AppAuthentication,
+  OAuthAppUserAuthentication,
+  GitHubAppUserAuthentication,
+  GitHubAppUserAuthenticationWithExpiration,
+} from "./types";
+export { createOAuthUserAuth } from "@octokit/auth-oauth-user";
 
 export function createOAuthAppAuth(
-  options: StrategyOptions
-): OAuthAppAuthInterface {
-  const usedDeprecatedOptions = deprecatedStrategyOptions.filter(
-    (option) => option in options
-  );
+  options: OAuthAppStrategyOptions
+): OAuthAppAuthInterface;
 
-  if (usedDeprecatedOptions.length) {
-    console.warn(
-      `[@octokit/auth-oauth-app] "${usedDeprecatedOptions.join(
-        ", "
-      )}" strategy options are deprecated. Use "@octokit/auth-oauth-user" instead`
-    );
-  }
+export function createOAuthAppAuth(
+  options: GitHubAppStrategyOptions
+): GitHubAuthInterface;
 
+export function createOAuthAppAuth(
+  options: OAuthAppStrategyOptions | GitHubAppStrategyOptions
+): OAuthAppAuthInterface | GitHubAuthInterface {
   const state = Object.assign(
     {
       request: request.defaults({
@@ -41,12 +46,14 @@ export function createOAuthAppAuth(
           "user-agent": `octokit-auth-oauth-app.js/${VERSION} ${getUserAgent()}`,
         },
       }),
+      clientType: "oauth-app",
     },
     options
   );
 
-  // @ts-expect-error wtf
+  // @ts-expect-error not worth the extra code to appease TS
   return Object.assign(auth.bind(null, state), {
+    // @ts-expect-error not worth the extra code to appease TS
     hook: hook.bind(null, state),
   });
 }
