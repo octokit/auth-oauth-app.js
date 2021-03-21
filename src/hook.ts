@@ -22,8 +22,10 @@ export async function hook(
     parameters
   ) as EndpointDefaults & { url: string };
 
-  // Do not intercept request to retrieve a new token
-  if (/\/login\/oauth\/access_token$/.test(endpoint.url as string)) {
+  // Do not intercept OAuth Web/Device flow request
+  if (
+    /\/login\/(oauth\/access_token|device\/code)$/.test(endpoint.url as string)
+  ) {
     return request(endpoint);
   }
 
