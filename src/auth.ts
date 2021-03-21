@@ -7,8 +7,7 @@ import {
   GitHubAppState,
   // auth options
   AppAuthOptions,
-  OAuthAppUserAuthOptions,
-  GitHubAppUserAuthOptions,
+  WebFlowAuthOptions,
   // authentication options
   AppAuthentication,
   OAuthAppUserAuthentication,
@@ -27,22 +26,19 @@ export async function auth(
 
 export async function auth(
   state: OAuthAppState,
-  authOptions: OAuthAppUserAuthOptions
+  authOptions: WebFlowAuthOptions
 ): Promise<OAuthAppUserAuthentication>;
 
 export async function auth(
   state: GitHubAppState,
-  authOptions: GitHubAppUserAuthOptions
+  authOptions: WebFlowAuthOptions
 ): Promise<
   GitHubAppUserAuthentication | GitHubAppUserAuthenticationWithExpiration
 >;
 
 export async function auth(
   state: OAuthAppState | GitHubAppState,
-  authOptions:
-    | AppAuthOptions
-    | OAuthAppUserAuthOptions
-    | GitHubAppUserAuthOptions
+  authOptions: AppAuthOptions | WebFlowAuthOptions
 ): Promise<
   | AppAuthentication
   | OAuthAppUserAuthentication

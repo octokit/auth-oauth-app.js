@@ -10,6 +10,8 @@ import * as AuthOAuthUser from "@octokit/auth-oauth-user";
 
 export type ClientType = "oauth-app" | "github-app";
 
+// STRATEGY OPTIONS
+
 export type OAuthAppStrategyOptions = {
   clientId: string;
   clientSecret: string;
@@ -23,21 +25,19 @@ export type GitHubAppStrategyOptions = {
   request?: RequestInterface;
 };
 
+// AUTH OPTIONS
+
 export type AppAuthOptions = {
   type: "oauth-app";
 };
-export type OAuthAppUserAuthOptions = {
+export type WebFlowAuthOptions = {
   type: "oauth-user";
   code: string;
   redirectUrl?: string;
   state?: string;
 };
-export type GitHubAppUserAuthOptions = {
-  type: "oauth-user";
-  code: string;
-  redirectUrl?: string;
-  state?: string;
-};
+
+// AUTHENTICATION OBJECT
 
 export type AppAuthentication = {
   type: "oauth-app";
@@ -53,16 +53,8 @@ export type OAuthAppUserAuthentication = AuthOAuthUser.OAuthAppAuthentication;
 export type GitHubAppUserAuthentication = AuthOAuthUser.GitHubAppAuthentication;
 export type GitHubAppUserAuthenticationWithExpiration = AuthOAuthUser.GitHubAppAuthenticationWithExpiration;
 
-export type OAuthAppState = OAuthAppStrategyOptions & {
-  clientType: "oauth-app";
-  request: RequestInterface;
-};
-export type GitHubAppState = OAuthAppStrategyOptions & {
-  clientType: "github-app";
-  request: RequestInterface;
-};
 export interface OAuthAppAuthInterface {
-  (options?: AppAuthOptions | OAuthAppUserAuthOptions): Promise<
+  (options?: AppAuthOptions | WebFlowAuthOptions): Promise<
     AppAuthentication | OAuthAppUserAuthentication
   >;
 
@@ -74,7 +66,7 @@ export interface OAuthAppAuthInterface {
 }
 
 export interface GitHubAuthInterface {
-  (options?: AppAuthOptions | GitHubAppUserAuthOptions): Promise<
+  (options?: AppAuthOptions | WebFlowAuthOptions): Promise<
     | AppAuthentication
     | GitHubAppUserAuthentication
     | GitHubAppUserAuthenticationWithExpiration
@@ -86,3 +78,14 @@ export interface GitHubAuthInterface {
     parameters?: RequestParameters
   ): Promise<OctokitResponse<any>>;
 }
+
+//  INTERNAL
+
+export type OAuthAppState = OAuthAppStrategyOptions & {
+  clientType: "oauth-app";
+  request: RequestInterface;
+};
+export type GitHubAppState = OAuthAppStrategyOptions & {
+  clientType: "github-app";
+  request: RequestInterface;
+};
