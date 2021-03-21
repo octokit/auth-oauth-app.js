@@ -11,9 +11,13 @@ It implements authentication using an OAuth app’s client ID and secret as well
 
 <!-- toc -->
 
-- [Usage](#usage)
-- [`createOAuthAppAuth(options)`](#createoauthappauthoptions)
-- [`auth(options)`](#authoptions)
+- [Standalone Usage](#standalone-usage)
+  - [Authenticate as app](#authenticate-as-app)
+  - [Authenticate user using OAuth Web Flow](#authenticate-user-using-oauth-web-flow)
+  - [Authenticate user using OAuth Device flow](#authenticate-user-using-oauth-device-flow)
+- [Usage with Octokit](#usage-with-octokit)
+- [`createOAuthAppAuth(options)` or `new Octokit({ auth })`](#createoauthappauthoptions-or-new-octokit-auth-)
+- [`auth(options)` or `octokit.auth(options)`](#authoptions-or-octokitauthoptions)
   - [Client ID/Client Server Basic authentication](#client-idclient-server-basic-authentication)
   - [OAuth web flow](#oauth-web-flow)
   - [OAuth device flow](#oauth-device-flow)
@@ -29,7 +33,7 @@ It implements authentication using an OAuth app’s client ID and secret as well
 
 <!-- tocstop -->
 
-## Usage
+## Standalone Usage
 
 <table>
 <tbody valign=top align=left>
@@ -55,6 +59,8 @@ const { createOAuthAppAuth } = require("@octokit/auth-oauth-app");
 </tbody>
 </table>
 
+### Authenticate as app
+
 ```js
 const auth = createOAuthAppAuth({
   clientType: "oauth-app",
@@ -62,43 +68,73 @@ const auth = createOAuthAppAuth({
   clientSecret: "1234567890abcdef1234567890abcdef12345678",
 });
 
-// OAuth Apps authenticate using Basic auth, where
-// username is clientId and password is clientSecret
 const appAuthentication = await auth({
   type: "oauth-app",
 });
-// resolves with
-// {
-//   type: 'oauth-app',
-//   clientId: '1234567890abcdef1234',
-//   clientSecret: '1234567890abcdef1234567890abcdef12345678',
-//   headers: {
-//     authorization: 'basic MTIzOnNlY3JldA=='
-//   }
-// }
+```
 
-// Exchange code from GitHub's OAuth web flow
-// see https://docs.github.com/en/developers/apps/authorizing-oauth-apps#2-users-are-redirected-back-to-your-site-by-github
+resolves with
+
+```json
+{
+  "type": "oauth-app",
+  "clientId": "1234567890abcdef1234",
+  "clientSecret": "1234567890abcdef1234567890abcdef12345678",
+  "headers": {
+    "authorization": "basic MTIzNDU2Nzg5MGFiY2RlZjEyMzQ6MTIzNDU2Nzg5MGFiY2RlZjEyMzQ1Njc4OTBhYmNkZWYxMjM0NTY3OA=="
+  }
+}
+```
+
+### Authenticate user using OAuth Web Flow
+
+Exchange code from GitHub's OAuth web flow, see https://docs.github.com/en/developers/apps/authorizing-oauth-apps#2-users-are-redirected-back-to-your-site-by-github
+
+```js
+const auth = createOAuthAppAuth({
+  clientType: "oauth-app",
+  clientId: "1234567890abcdef1234",
+  clientSecret: "1234567890abcdef1234567890abcdef12345678",
+});
+
 const userAuthenticationFromWebFlow = await auth({
   type: "oauth-user",
   code: "random123",
   state: "mystate123",
 });
-// resolves with
-// {
-//   clientType: 'oauth-app',
-//   clientId: '1234567890abcdef1234',
-//   clientSecret: '1234567890abcdef1234567890abcdef12345678',
-//   type: 'token',
-//   tokenType: 'oauth',
-//   token: '...', /* the created oauth token */
-//   scopes: [] /* depend on request scopes by OAuth app */
-// }
+```
 
-// Create user access token using the device flow
-// see https://docs.github.com/en/developers/apps/authorizing-oauth-apps#2-users-are-redirected-back-to-your-site-by-github
-const userAuthenticationFromDeviceFlow = auth({
-  onVerification(verification) {
+resolves with
+
+```json
+{
+  "clientType": "oauth-app",
+  "clientId": "1234567890abcdef1234",
+  "clientSecret": "1234567890abcdef1234567890abcdef12345678",
+  "type": "token",
+  "tokenType": "oauth",
+  "token": "useraccesstoken123",
+  "scopes": []
+}
+```
+
+### Authenticate user using OAuth Device flow
+
+Pass an asynchronous `onVerification()` method which will be called with the response from step 1 of the device flow. In that function you have to prompt the user to enter the user code at the provided verification URL.
+
+`auth()` will not resolve until the user entered the code and granted access to the app.
+
+See https://docs.github.com/en/developers/apps/authorizing-oauth-apps#2-users-are-redirected-back-to-your-site-by-github
+
+```js
+const auth = createOAuthAppAuth({
+  clientType: "oauth-app",
+  clientId: "1234567890abcdef1234",
+  clientSecret: "1234567890abcdef1234567890abcdef12345678",
+});
+
+const userAuthenticationFromDeviceFlow = await auth({
+  async onVerification(verification) {
     // verification example
     // {
     //   device_code: "3584d83530557fdd1f46af8289938c8ef79f9dc5",
@@ -112,12 +148,94 @@ const userAuthenticationFromDeviceFlow = auth({
     console.log("Enter code: %s", verification.user_code);
   },
 });
-// resolves with same properties as userAuthenticationFromWebFlow above
 ```
 
-## `createOAuthAppAuth(options)`
+resolves with
 
-The `createOAuthAppAuth` method accepts a single `options` parameter
+```json
+{
+  "clientType": "oauth-app",
+  "clientId": "1234567890abcdef1234",
+  "clientSecret": "1234567890abcdef1234567890abcdef12345678",
+  "type": "token",
+  "tokenType": "oauth",
+  "token": "useraccesstoken123",
+  "scopes": []
+}
+```
+
+## Usage with Octokit
+
+<table>
+<tbody valign=top align=left>
+<tr><th>
+
+Browsers
+
+</th><td width=100%>
+
+`@octokit/auth-oauth-app` is not meant for usage in the browser. The OAuth APIs to create tokens do not have CORS enabled, and a client secret must not be exposed to the client.
+
+</td></tr>
+<tr><th>
+
+Node
+
+</th><td>
+
+Install with `npm install @octokit/core @octokit/auth-oauth-app`. Optionally replace `@octokit/core` with a compatible module
+
+```js
+const { Octokit } = require("@octokit/core");
+const {
+  createOAuthAppAuth,
+  createOAuthUserAuth,
+} = require("@octokit/auth-oauth-app");
+```
+
+</td></tr>
+</tbody>
+</table>
+
+```js
+const appOctokit = new Octokit({
+  authStrategy: createOAuthAppAuth,
+  auth: {
+    clientId: "1234567890abcdef1234",
+    clientSecret: "1234567890abcdef1234567890abcdef12345678",
+  },
+});
+
+// Send requests as app
+await appOctokit.request("POST /application/{client_id}/token", {
+  client_id: "1234567890abcdef1234",
+  access_token: "existingtoken123",
+});
+console.log("token is valid");
+
+// create a new octokit instance that is authenticated as the user
+const userOctokit = await appOctokit.auth({
+  type: "oauth-user",
+  code: "code123",
+  factor: (options) => {
+    new Octokit({
+      authStrategy: createOAuthUserAuth,
+      auth: options,
+    });
+  },
+});
+
+// Exchanges the code for the user access token authentication on first request
+// and caches the authentication for successive requests
+const {
+  data: { login },
+} = await userOctokit.request("GET /user");
+console.log("Hello, %s!", login);
+```
+
+## `createOAuthAppAuth(options)` or `new Octokit({ auth })`
+
+The `createOAuthAppAuth` method accepts a single `options` object as argument. The same set of options can be passed as `auth` to the `Octokit` constructor when setting `authStrategy: createOAuthAppAuth`
 
 <table width="100%">
   <thead align=left>
@@ -192,7 +310,7 @@ createOAuthAppAuth({
   </tbody>
 </table>
 
-## `auth(options)`
+## `auth(options)` or `octokit.auth(options)`
 
 The async `auth()` method returned by `createOAuthAppAuth(options)` accepts different options depending on your use case
 
@@ -479,6 +597,17 @@ The async `auth(options)` method to one of four possible authentication objects
       </th>
       <td>
         <code>"oauth-app"</code>
+      </td>
+    </tr>
+    <tr>
+      <th>
+        <code>clientType</code>
+      </th>
+      <th>
+        <code>string</code>
+      </th>
+      <td>
+        <code>"oauth-app"</code> or <code>"github-app"</code>
       </td>
     </tr>
     <tr>
