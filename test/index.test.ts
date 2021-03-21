@@ -1,5 +1,6 @@
-import fetchMock from "fetch-mock";
+import fetchMock, { MockMatcherFunction } from "fetch-mock";
 import { request } from "@octokit/request";
+import { Octokit } from "@octokit/core";
 
 import { createOAuthAppAuth, createOAuthUserAuth } from "../src/index";
 
@@ -161,6 +162,97 @@ test("README device flow example", async () => {
     user_code: "usercode123",
     verification_uri: "https://github.com/login/device",
   });
+});
+
+test("README Octokit usage example", async () => {
+  const matchGetUserRequest: MockMatcherFunction = (url, options) => {
+    expect(url).toEqual("https://api.github.com/user");
+    expect(options.headers).toEqual(
+      expect.objectContaining({
+        accept: "application/vnd.github.v3+json",
+        authorization: "token token123",
+      })
+    );
+
+    return true;
+  };
+
+  const mock = fetchMock
+    .sandbox()
+
+    .postOnce(
+      "https://api.github.com/applications/1234567890abcdef1234/token",
+      { ok: true },
+      {
+        body: {
+          access_token: "existingtoken123",
+        },
+      }
+    )
+
+    .postOnce(
+      "https://github.com/login/oauth/access_token",
+      {
+        access_token: "token123",
+        scope: "",
+      },
+      {
+        body: {
+          client_id: "1234567890abcdef1234",
+          client_secret: "1234567890abcdef1234567890abcdef12345678",
+          code: "code123",
+        },
+      }
+    )
+
+    .getOnce(matchGetUserRequest, {
+      login: "octocat",
+    });
+
+  const appOctokit = new Octokit({
+    authStrategy: createOAuthAppAuth,
+    auth: {
+      clientId: "1234567890abcdef1234",
+      clientSecret: "1234567890abcdef1234567890abcdef12345678",
+    },
+    userAgent: "test",
+    request: {
+      fetch: mock,
+    },
+  });
+
+  // Send requests as app
+  const { data } = await appOctokit.request(
+    "POST /applications/{client_id}/token",
+    {
+      client_id: "1234567890abcdef1234",
+      access_token: "existingtoken123",
+    }
+  );
+  expect(data).toEqual({ ok: true });
+
+  // create a new octokit instance that is authenticated as the user
+  const userOctokit = (await appOctokit.auth({
+    type: "oauth-user",
+    code: "code123",
+    factory: (options: any) => {
+      return new Octokit({
+        authStrategy: createOAuthUserAuth,
+        auth: options,
+        userAgent: "test",
+        request: {
+          fetch: mock,
+        },
+      });
+    },
+  })) as Octokit;
+
+  // Exchanges the code for the user access token authentication on first request
+  // and caches the authentication for successive requests
+  const {
+    data: { login },
+  } = await userOctokit.request("GET /user");
+  expect(login).toEqual("octocat");
 });
 
 test("GitHub App", async () => {
