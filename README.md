@@ -23,6 +23,7 @@ It implements authentication using an OAuth app’s client ID and secret as well
   - [GitHub APP user authentication token with expiring disabled](#github-app-user-authentication-token-with-expiring-disabled)
   - [GitHub APP user authentication token with expiring enabled](#github-app-user-authentication-token-with-expiring-enabled)
 - [`auth.hook(request, route, parameters)` or `auth.hook(request, options)`](#authhookrequest-route-parameters-or-authhookrequest-options)
+- [Types](#types)
 - [Implementation details](#implementation-details)
 - [License](#license)
 
@@ -291,6 +292,44 @@ Exchange `code` for a user access token. See [Web application flow](https://docs
         The unguessable random string you provided in Step 1 of the <a href="https://developer.github.com/apps/building-oauth-apps/authorizing-oauth-apps/#2-users-are-redirected-back-to-your-site-by-github">OAuth web application flow</a>.
       </td>
     </tr>
+    <tr>
+      <th>
+        <code>factory</code>
+      </th>
+      <th>
+        <code>function</code>
+      </th>
+      <td>
+
+When the `factory` option is, the `auth({type: "oauth-user", code, factory })` call with resolve with whatever the `factory` function returns. The `factory` function will be called with all the strategy option that `auth` was created with, plus the additional options passed to `auth`, besides `type` and `factory`.
+
+For example, you can create a new `auth` instance for for a user using [`createOAuthUserAuth`](https://github.com/octokit/auth-oauth-user.js/#readme) which implements auto-refreshing tokens, among other features. You can import `createOAuthUserAuth` directly from `@octokit/auth-oauth-app` which will ensure compatibility.
+
+```js
+const {
+  createAppAuth,
+  createOAuthUserAuth,
+} = require("@octokit/auth-oauth-app");
+
+const appAuth = createAppAuth({
+  clientType: "github-app",
+  clientId: "lv1.1234567890abcdef",
+  clientSecret: "1234567890abcdef1234567890abcdef12345678",
+});
+
+const userAuth = await appAuth({
+  type: "oauth-user",
+  code,
+  factory: createOAuthUserAuth,
+});
+
+// will create token upon first call, then cache authentication for successive calls,
+// until token needs to be refreshed (if enabled for the GitHub App)
+const authentication = await userAuth();
+```
+
+</td>
+    </tr>
   </tbody>
 </table>
 
@@ -364,6 +403,44 @@ const auth = auth({
         Only relevant if the <code>clientType</code> strategy option is set to <code>"oauth-app"</code>.Array of OAuth scope names that the user access token should be granted. Defaults to no scopes (<code>[]</code>).
       </td>
     </tr>
+    <tr>
+      <th>
+        <code>factory</code>
+      </th>
+      <th>
+        <code>function</code>
+      </th>
+      <td>
+
+When the `factory` option is, the `auth({type: "oauth-user", code, factory })` call with resolve with whatever the `factory` function returns. The `factory` function will be called with all the strategy option that `auth` was created with, plus the additional options passed to `auth`, besides `type` and `factory`.
+
+For example, you can create a new `auth` instance for for a user using [`createOAuthUserAuth`](https://github.com/octokit/auth-oauth-user.js/#readme) which implements auto-refreshing tokens, among other features. You can import `createOAuthUserAuth` directly from `@octokit/auth-oauth-app` which will ensure compatibility.
+
+```js
+const {
+  createOAuthAppAuth,
+  createOAuthUserAuth,
+} = require("@octokit/auth-oauth-app");
+
+const appAuth = createOAuthAppAuth({
+  clientType: "github-app",
+  clientId: "lv1.1234567890abcdef",
+  clientSecret: "1234567890abcdef1234567890abcdef12345678",
+});
+
+const userAuth = await appAuth({
+  type: "oauth-user",
+  onVerification,
+  factory: createOAuthUserAuth,
+});
+
+// will create token upon first call, then cache authentication for successive calls,
+// until token needs to be refreshed (if enabled for the GitHub App)
+const authentication = await userAuth();
+```
+
+</td>
+    </tr>
   </tbody>
 </table>
 
@@ -376,7 +453,7 @@ The async `auth(options)` method to one of four possible authentication objects
 3. **GitHub APP user authentication token with expiring disabled** for `auth({ type: "oauth-app" })` and App is a GitHub App (user-to-server token)
 4. **GitHub APP user authentication token with expiring enabled** for `auth({ type: "oauth-app" })` and App is a GitHub App (user-to-server token)
 
-#### OAuth App authentication
+### OAuth App authentication
 
 <table width="100%">
   <thead align=left>
@@ -440,7 +517,7 @@ The async `auth(options)` method to one of four possible authentication objects
   </tbody>
 </table>
 
-#### OAuth user access token authentication
+### OAuth user access token authentication
 
 <table width="100%">
   <thead align=left>
@@ -790,7 +867,7 @@ import {
   AppAuthOptions,
   WebFlowAuthOptions,
   OAuthAppDeviceFlowAuthOptions,
-  GitHubDeviceFlowAuthOptions,
+  GitHubAppDeviceFlowAuthOptions,
   // authentication object
   AppAuthentication,
   OAuthAppUserAuthentication,
