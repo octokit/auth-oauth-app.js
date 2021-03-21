@@ -14,6 +14,7 @@ export type ClientType = "oauth-app" | "github-app";
 // STRATEGY OPTIONS
 
 export type OAuthAppStrategyOptions = {
+  clientType?: "oauth-app";
   clientId: string;
   clientSecret: string;
   request?: RequestInterface;

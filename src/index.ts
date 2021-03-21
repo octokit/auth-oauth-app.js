@@ -11,6 +11,22 @@ import {
 } from "./types";
 import { VERSION } from "./version";
 
+export {
+  // strategy
+  OAuthAppStrategyOptions,
+  GitHubAppStrategyOptions,
+  // auth
+  AppAuthOptions,
+  WebFlowAuthOptions,
+  OAuthAppDeviceFlowAuthOptions,
+  GitHubDeviceFlowAuthOptions,
+  // authentication object
+  AppAuthentication,
+  OAuthAppUserAuthentication,
+  GitHubAppUserAuthentication,
+  GitHubAppUserAuthenticationWithExpiration,
+} from "./types";
+
 export function createOAuthAppAuth(
   options: OAuthAppStrategyOptions
 ): OAuthAppAuthInterface;

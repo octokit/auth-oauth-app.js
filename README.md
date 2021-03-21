@@ -779,6 +779,26 @@ const { data: user } = await requestWithAuth(
 );
 ```
 
+## Types
+
+```ts
+import {
+  // strategy options
+  OAuthAppStrategyOptions,
+  GitHubAppStrategyOptions,
+  // auth options
+  AppAuthOptions,
+  WebFlowAuthOptions,
+  OAuthAppDeviceFlowAuthOptions,
+  GitHubDeviceFlowAuthOptions,
+  // authentication object
+  AppAuthentication,
+  OAuthAppUserAuthentication,
+  GitHubAppUserAuthentication,
+  GitHubAppUserAuthenticationWithExpiration,
+} from "@octokit/auth-oauth-app";
+```
+
 ## Implementation details
 
 Client ID and secret can be passed as Basic auth in the `Authorization` header in order to get a higher rate limit compared to unauthenticated requests. This is meant for the use on servers only: never expose an OAuth client secret on a client such as a web application!
