@@ -135,7 +135,7 @@ The `createOAuthAppAuth` method accepts a single `options` parameter
   <tbody align=left valign=top>
     <tr>
       <th>
-        <code>options.clientId</code>
+        <code>clientId</code>
       </th>
       <th>
         <code>string</code>
@@ -146,7 +146,7 @@ The `createOAuthAppAuth` method accepts a single `options` parameter
     </tr>
     <tr>
       <th>
-        <code>options.clientSecret</code>
+        <code>clientSecret</code>
       </th>
       <th>
         <code>string</code>
@@ -157,7 +157,7 @@ The `createOAuthAppAuth` method accepts a single `options` parameter
     </tr>
     <tr>
       <th>
-        <code>options.clientType</code>
+        <code>clientType</code>
       </th>
       <th>
         <code>string</code>
@@ -168,7 +168,7 @@ The `createOAuthAppAuth` method accepts a single `options` parameter
     </tr>
     <tr>
       <th>
-        <code>options.request</code>
+        <code>request</code>
       </th>
       <th>
         <code>function</code>
@@ -216,7 +216,7 @@ All REST API routes starting with `/applications/{client_id}` need to be authent
   <tbody align=left valign=top>
     <tr>
       <th>
-        <code>options.type</code>
+        <code>type</code>
       </th>
       <th>
         <code>string</code>
@@ -249,7 +249,7 @@ Exchange `code` for a user access token. See [Web application flow](https://docs
   <tbody align=left valign=top>
     <tr>
       <th>
-        <code>options.type</code>
+        <code>type</code>
       </th>
       <th>
         <code>string</code>
@@ -260,7 +260,7 @@ Exchange `code` for a user access token. See [Web application flow](https://docs
     </tr>
     <tr>
       <th>
-        <code>options.code</code>
+        <code>code</code>
       </th>
       <th>
         <code>string</code>
@@ -271,7 +271,7 @@ Exchange `code` for a user access token. See [Web application flow](https://docs
     </tr>
     <tr>
       <th>
-        <code>options.redirectUrl</code>
+        <code>redirectUrl</code>
       </th>
       <th>
         <code>string</code>
@@ -282,7 +282,7 @@ Exchange `code` for a user access token. See [Web application flow](https://docs
     </tr>
     <tr>
       <th>
-        <code>options.state</code>
+        <code>state</code>
       </th>
       <th>
         <code>string</code>
@@ -317,7 +317,7 @@ The device flow does not require a client secret, but it is required as strategy
   <tbody align=left valign=top>
     <tr>
       <th>
-        <code>options.type</code>
+        <code>type</code>
       </th>
       <th>
         <code>string</code>
