@@ -1,7 +1,7 @@
 import fetchMock from "fetch-mock";
 import { request } from "@octokit/request";
 
-import { createOAuthAppAuth } from "../src/index";
+import { createOAuthAppAuth, createOAuthUserAuth } from "../src/index";
 
 test("README example with {type: 'oauth-app'}", async () => {
   const auth = createOAuthAppAuth({
@@ -213,6 +213,61 @@ test("GitHub App", async () => {
     type: "token",
     tokenType: "oauth",
     token: "secret123",
+  });
+});
+
+test("`factory` auth option", async () => {
+  const mock = fetchMock.sandbox().postOnce(
+    "https://github.com/login/oauth/access_token",
+    {
+      access_token: "secret123",
+      scope: "",
+      token_type: "bearer",
+    },
+    {
+      headers: {
+        accept: "application/json",
+        "user-agent": "test",
+        "content-type": "application/json; charset=utf-8",
+      },
+      body: {
+        client_id: "1234567890abcdef1234",
+        client_secret: "1234567890abcdef1234567890abcdef12345678",
+        code: "random123",
+      },
+    }
+  );
+
+  const appAuth = createOAuthAppAuth({
+    clientType: "oauth-app",
+    clientId: "1234567890abcdef1234",
+    clientSecret: "1234567890abcdef1234567890abcdef12345678",
+    request: request.defaults({
+      headers: {
+        "user-agent": "test",
+      },
+      request: {
+        fetch: mock,
+      },
+    }),
+  });
+
+  const userAuth = await appAuth({
+    type: "oauth-user",
+    code: "random123",
+    factory: (options) => createOAuthUserAuth(options),
+  });
+
+  const authentication = await userAuth();
+
+  expect(authentication).toEqual({
+    clientId: "1234567890abcdef1234",
+    clientSecret: "1234567890abcdef1234567890abcdef12345678",
+    clientType: "oauth-app",
+    type: "token",
+    tokenType: "oauth",
+    token: "secret123",
+    scopes: [],
   });
 });
 

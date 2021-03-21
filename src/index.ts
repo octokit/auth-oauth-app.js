@@ -19,13 +19,14 @@ export {
   AppAuthOptions,
   WebFlowAuthOptions,
   OAuthAppDeviceFlowAuthOptions,
-  GitHubDeviceFlowAuthOptions,
+  GitHubAppDeviceFlowAuthOptions,
   // authentication object
   AppAuthentication,
   OAuthAppUserAuthentication,
   GitHubAppUserAuthentication,
   GitHubAppUserAuthenticationWithExpiration,
 } from "./types";
+export { createOAuthUserAuth } from "@octokit/auth-oauth-user";
 
 export function createOAuthAppAuth(
   options: OAuthAppStrategyOptions

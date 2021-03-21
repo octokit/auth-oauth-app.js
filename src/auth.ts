@@ -9,59 +9,101 @@ import {
   AppAuthOptions,
   WebFlowAuthOptions,
   OAuthAppDeviceFlowAuthOptions,
-  GitHubDeviceFlowAuthOptions,
+  GitHubAppDeviceFlowAuthOptions,
+  FactoryOAuthAppWebFlow,
+  FactoryOAuthAppDeviceFlow,
+  FactoryGitHubWebFlow,
+  FactoryGitHubDeviceFlow,
   // authentication options
   AppAuthentication,
   OAuthAppUserAuthentication,
   GitHubAppUserAuthentication,
   GitHubAppUserAuthenticationWithExpiration,
 } from "./types";
-import {
-  GitHubAppAuthInterface,
-  OAuthAppAuthInterface,
-} from "@octokit/auth-oauth-user/dist-types/types";
 
+//  App authentication
 export async function auth(
   state: OAuthAppState | GitHubAppState,
   authOptions: AppAuthOptions
 ): Promise<AppAuthentication>;
 
+// OAuth App Web flow
 export async function auth(
   state: OAuthAppState,
   authOptions: WebFlowAuthOptions
 ): Promise<OAuthAppUserAuthentication>;
 
-export async function auth(
-  state: GitHubAppState,
-  authOptions: WebFlowAuthOptions
-): Promise<
-  GitHubAppUserAuthentication | GitHubAppUserAuthenticationWithExpiration
->;
+// OAuth App Web flow with `factory` option
+export async function auth<T = unknown>(
+  state: OAuthAppState,
+  authOptions: WebFlowAuthOptions & { factory: FactoryOAuthAppWebFlow<T> }
+): Promise<T>;
 
+// Oauth App Device Flow
 export async function auth(
   state: OAuthAppState,
   authOptions: OAuthAppDeviceFlowAuthOptions
 ): Promise<OAuthAppUserAuthentication>;
 
+// OAuth App Device flow with `factory` option
+export async function auth<T = unknown>(
+  state: OAuthAppState,
+  authOptions: OAuthAppDeviceFlowAuthOptions & {
+    factory: FactoryOAuthAppDeviceFlow<T>;
+  }
+): Promise<T>;
+
+// GitHub App Web flow
 export async function auth(
   state: GitHubAppState,
-  authOptions: GitHubDeviceFlowAuthOptions
+  authOptions: WebFlowAuthOptions
 ): Promise<
   GitHubAppUserAuthentication | GitHubAppUserAuthenticationWithExpiration
 >;
 
+// GitHub App Web flow with `factory` option
+export async function auth<T = unknown>(
+  state: GitHubAppState,
+  authOptions: WebFlowAuthOptions & { factory: FactoryGitHubWebFlow<T> }
+): Promise<T>;
+
+// GitHub App Device Flow
 export async function auth(
+  state: GitHubAppState,
+  authOptions: GitHubAppDeviceFlowAuthOptions
+): Promise<
+  GitHubAppUserAuthentication | GitHubAppUserAuthenticationWithExpiration
+>;
+
+// GitHub App Device flow with `factory` option
+export async function auth<T = unknown>(
+  state: GitHubAppState,
+  authOptions: GitHubAppDeviceFlowAuthOptions & {
+    factory: FactoryGitHubDeviceFlow<T>;
+  }
+): Promise<T>;
+
+export async function auth<T = unknown>(
   state: OAuthAppState | GitHubAppState,
   authOptions:
     | AppAuthOptions
     | WebFlowAuthOptions
     | OAuthAppDeviceFlowAuthOptions
-    | GitHubDeviceFlowAuthOptions
+    | GitHubAppDeviceFlowAuthOptions
+    | (WebFlowAuthOptions & { factory: FactoryOAuthAppWebFlow<T> })
+    | (OAuthAppDeviceFlowAuthOptions & {
+        factory: FactoryOAuthAppDeviceFlow<T>;
+      })
+    | (WebFlowAuthOptions & { factory: FactoryGitHubWebFlow<T> })
+    | (GitHubAppDeviceFlowAuthOptions & {
+        factory: FactoryGitHubDeviceFlow<T>;
+      })
 ): Promise<
   | AppAuthentication
   | OAuthAppUserAuthentication
   | GitHubAppUserAuthentication
   | GitHubAppUserAuthenticationWithExpiration
+  | T
 > {
   if (authOptions.type === "oauth-app") {
     return {
@@ -75,6 +117,16 @@ export async function auth(
         )}`,
       },
     };
+  }
+
+  if ("factory" in authOptions) {
+    const { type, ...options } = {
+      ...authOptions,
+      ...state,
+    };
+
+    // @ts-expect-error TODO: `option` cannot be never, is this a bug?
+    return authOptions.factory(options);
   }
 
   const common = {

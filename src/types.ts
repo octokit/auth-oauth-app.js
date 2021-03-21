@@ -43,7 +43,7 @@ export type OAuthAppDeviceFlowAuthOptions = {
   onVerification: DeviceTypes.OAuthAppStrategyOptions["onVerification"];
   scopes?: string[];
 };
-export type GitHubDeviceFlowAuthOptions = {
+export type GitHubAppDeviceFlowAuthOptions = {
   type: "oauth-user";
   onVerification: DeviceTypes.OAuthAppStrategyOptions["onVerification"];
 };
@@ -64,13 +64,47 @@ export type OAuthAppUserAuthentication = AuthOAuthUser.OAuthAppAuthentication;
 export type GitHubAppUserAuthentication = AuthOAuthUser.GitHubAppAuthentication;
 export type GitHubAppUserAuthenticationWithExpiration = AuthOAuthUser.GitHubAppAuthenticationWithExpiration;
 
+export type FactoryOAuthAppWebFlowOptions = OAuthAppStrategyOptions &
+  Omit<WebFlowAuthOptions, "type"> & { clientType: "oauth-app" };
+export type FactoryOAuthAppDeviceFlowOptions = OAuthAppStrategyOptions &
+  Omit<OAuthAppDeviceFlowAuthOptions, "type"> & { clientType: "oauth-app" };
+export type FactoryGitHubAppWebFlowOptions = GitHubAppStrategyOptions &
+  Omit<WebFlowAuthOptions, "type"> & { clientType: "github-app" };
+export type FactoryGitHubAppDeviceFlowOptions = GitHubAppStrategyOptions &
+  Omit<GitHubAppDeviceFlowAuthOptions, "type"> & {
+    clientType: "github-app";
+  };
+
+export interface FactoryOAuthAppWebFlow<T> {
+  (options: FactoryOAuthAppWebFlowOptions): T;
+}
+export interface FactoryOAuthAppDeviceFlow<T> {
+  (options: FactoryOAuthAppDeviceFlowOptions): T;
+}
+export interface FactoryGitHubWebFlow<T> {
+  (options: FactoryGitHubAppWebFlowOptions): T;
+}
+export interface FactoryGitHubDeviceFlow<T> {
+  (options: FactoryGitHubAppDeviceFlowOptions): T;
+}
+
 export interface OAuthAppAuthInterface {
-  (
-    options?:
-      | AppAuthOptions
-      | WebFlowAuthOptions
-      | OAuthAppDeviceFlowAuthOptions
-  ): Promise<AppAuthentication | OAuthAppUserAuthentication>;
+  // app auth
+  (options: AppAuthOptions): Promise<AppAuthentication>;
+
+  // user auth with `factory` option
+  <T = unknown>(
+    options: WebFlowAuthOptions & { factory: FactoryOAuthAppWebFlow<T> }
+  ): Promise<T>;
+  <T = unknown>(
+    options: OAuthAppDeviceFlowAuthOptions & {
+      factory: FactoryOAuthAppDeviceFlow<T>;
+    }
+  ): Promise<T>;
+
+  // user auth without `factory` option
+  (options: WebFlowAuthOptions): Promise<OAuthAppUserAuthentication>;
+  (options: OAuthAppDeviceFlowAuthOptions): Promise<OAuthAppUserAuthentication>;
 
   hook(
     request: RequestInterface,
@@ -80,12 +114,25 @@ export interface OAuthAppAuthInterface {
 }
 
 export interface GitHubAuthInterface {
-  (
-    options?: AppAuthOptions | WebFlowAuthOptions | GitHubDeviceFlowAuthOptions
-  ): Promise<
-    | AppAuthentication
-    | GitHubAppUserAuthentication
-    | GitHubAppUserAuthenticationWithExpiration
+  // app auth
+  (options?: AppAuthOptions): Promise<AppAuthentication>;
+
+  // user auth with `factory` option
+  <T = unknown>(
+    options: WebFlowAuthOptions & { factory: FactoryGitHubWebFlow<T> }
+  ): Promise<T>;
+  <T = unknown>(
+    options: GitHubAppDeviceFlowAuthOptions & {
+      factory: FactoryGitHubDeviceFlow<T>;
+    }
+  ): Promise<T>;
+
+  // user auth without `factory` option
+  (options?: WebFlowAuthOptions): Promise<
+    GitHubAppUserAuthentication | GitHubAppUserAuthenticationWithExpiration
+  >;
+  (options?: GitHubAppDeviceFlowAuthOptions): Promise<
+    GitHubAppUserAuthentication | GitHubAppUserAuthenticationWithExpiration
   >;
 
   hook(
