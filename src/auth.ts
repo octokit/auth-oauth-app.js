@@ -1,5 +1,5 @@
 import btoa from "btoa-lite";
-import { exchangeWebFlowCode } from "@octokit/oauth-methods";
+import { createOAuthUserAuth } from "@octokit/auth-oauth-user";
 
 import {
   // state
@@ -15,6 +15,10 @@ import {
   GitHubAppUserAuthentication,
   GitHubAppUserAuthenticationWithExpiration,
 } from "./types";
+import {
+  GitHubAppAuthInterface,
+  OAuthAppAuthInterface,
+} from "@octokit/auth-oauth-user/dist-types/types";
 
 export async function auth(
   state: OAuthAppState | GitHubAppState,
@@ -62,23 +66,21 @@ export async function auth(
   const common = {
     clientId: state.clientId,
     clientSecret: state.clientSecret,
-    code: authOptions.code,
-    state: authOptions.state,
-    redirectUrl: authOptions.redirectUrl,
     request: state.request,
+    ...authOptions,
   };
 
-  // Look what you made me do, TS
-  const { authentication } =
+  // TS: Look what you made me do
+  const userAuth =
     state.clientType === "oauth-app"
-      ? await exchangeWebFlowCode({
+      ? await createOAuthUserAuth({
           ...common,
           clientType: state.clientType,
         })
-      : await exchangeWebFlowCode({
+      : await createOAuthUserAuth({
           ...common,
           clientType: state.clientType,
         });
 
-  return { ...authentication, tokenType: "oauth", type: "token" };
+  return userAuth();
 }

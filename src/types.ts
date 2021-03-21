@@ -29,7 +29,6 @@ export type AppAuthOptions = {
 export type OAuthAppUserAuthOptions = {
   type: "oauth-user";
   code: string;
-  scopes?: string[];
   redirectUrl?: string;
   state?: string;
 };

@@ -207,17 +207,6 @@ The async `auth()` method returned by `createOAuthAppAuth(options)` accepts the 
     </tr>
     <tr>
       <th>
-        <code>options.scopes</code>
-      </th>
-      <th>
-        <code>array of strings</code>
-      </th>
-      <td>
-        Only relevant if <code>options.type</code> is set to <code>"oauth-user"</code> and <code>clientType</code> strategy option is set to <code>"oauth-app"</code>
-      </td>
-    </tr>
-    <tr>
-      <th>
         <code>options.redirectUrl</code>
       </th>
       <th>
