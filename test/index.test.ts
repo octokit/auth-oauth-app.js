@@ -164,6 +164,93 @@ test("README device flow example", async () => {
   });
 });
 
+test("device flow with scopes", async () => {
+  const mock = fetchMock
+    .sandbox()
+
+    .postOnce(
+      "https://github.com/login/device/code",
+      {
+        device_code: "devicecode123",
+        user_code: "usercode123",
+        verification_uri: "https://github.com/login/device",
+        expires_in: 900,
+        // use low number because jest.useFakeTimers() & jest.runAllTimers() didn't work for me
+        interval: 0.005,
+      },
+      {
+        headers: {
+          accept: "application/json",
+          "user-agent": "test",
+          "content-type": "application/json; charset=utf-8",
+        },
+        body: {
+          client_id: "1234567890abcdef1234",
+          scope: "repo gist",
+        },
+      }
+    )
+    .postOnce(
+      "https://github.com/login/oauth/access_token",
+      {
+        access_token: "token123",
+        scope: "repo gist",
+      },
+      {
+        headers: {
+          accept: "application/json",
+          "user-agent": "test",
+          "content-type": "application/json; charset=utf-8",
+        },
+        body: {
+          client_id: "1234567890abcdef1234",
+          device_code: "devicecode123",
+          grant_type: "urn:ietf:params:oauth:grant-type:device_code",
+        },
+        overwriteRoutes: false,
+      }
+    );
+
+  const auth = createOAuthAppAuth({
+    clientId: "1234567890abcdef1234",
+    clientSecret: "secret",
+    // pass request mock for testing
+    request: request.defaults({
+      headers: {
+        "user-agent": "test",
+      },
+      request: {
+        fetch: mock,
+      },
+    }),
+  });
+
+  const onVerification = jest.fn();
+  const authentication = await auth({
+    type: "oauth-user",
+    scopes: ["repo", "gist"],
+    onVerification,
+  });
+
+  expect(authentication).toEqual({
+    type: "token",
+    tokenType: "oauth",
+    clientType: "oauth-app",
+    clientId: "1234567890abcdef1234",
+    clientSecret: "secret",
+    token: "token123",
+    scopes: ["repo", "gist"],
+  });
+
+  expect(onVerification).toHaveBeenCalledWith({
+    device_code: "devicecode123",
+    expires_in: 900,
+    interval: 0.005,
+    user_code: "usercode123",
+    verification_uri: "https://github.com/login/device",
+  });
+});
+
 test("README Octokit usage example", async () => {
   const matchGetUserRequest: MockMatcherFunction = (url, options) => {
     expect(url).toEqual("https://api.github.com/user");
