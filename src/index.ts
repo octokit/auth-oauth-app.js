@@ -12,14 +12,17 @@ import {
 import { VERSION } from "./version";
 
 export {
-  // strategy
+  // strategy options
   OAuthAppStrategyOptions,
   GitHubAppStrategyOptions,
-  // auth
+  // auth options
   AppAuthOptions,
   WebFlowAuthOptions,
   OAuthAppDeviceFlowAuthOptions,
   GitHubAppDeviceFlowAuthOptions,
+  // auth interfaces
+  OAuthAppAuthInterface,
+  GitHubAuthInterface,
   // authentication object
   AppAuthentication,
   OAuthAppUserAuthentication,
