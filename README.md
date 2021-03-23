@@ -425,11 +425,11 @@ For example, you can create a new `auth` instance for for a user using [`createO
 
 ```js
 const {
-  createAppAuth,
+  createOAuthAppAuth,
   createOAuthUserAuth,
 } = require("@octokit/auth-oauth-app");
 
-const appAuth = createAppAuth({
+const appAuth = createOAuthAppAuth({
   clientType: "github-app",
   clientId: "lv1.1234567890abcdef",
   clientSecret: "1234567890abcdef1234567890abcdef12345678",
