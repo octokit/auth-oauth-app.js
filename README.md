@@ -18,7 +18,7 @@ It implements authentication using an OAuth app’s client ID and secret as well
 - [Usage with Octokit](#usage-with-octokit)
 - [`createOAuthAppAuth(options)` or `new Octokit({ auth })`](#createoauthappauthoptions-or-new-octokit-auth-)
 - [`auth(options)` or `octokit.auth(options)`](#authoptions-or-octokitauthoptions)
-  - [Client ID/Client Server Basic authentication](#client-idclient-server-basic-authentication)
+  - [Client ID/Client Secret Basic authentication](#client-idclient-server-basic-authentication)
   - [OAuth web flow](#oauth-web-flow)
   - [OAuth device flow](#oauth-device-flow)
 - [Authentication object](#authentication-object)
@@ -314,7 +314,7 @@ createOAuthAppAuth({
 
 The async `auth()` method returned by `createOAuthAppAuth(options)` accepts different options depending on your use case
 
-### Client ID/Client Server Basic authentication
+### Client ID/Client Secret Basic authentication
 
 All REST API routes starting with `/applications/{client_id}` need to be authenticated using the OAuth/GitHub App's Client ID and a client secret.
 
