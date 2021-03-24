@@ -45,10 +45,11 @@ Browsers
 
 If you know what you are doing, load `@octokit/auth-oauth-app` directly from [cdn.skypack.dev](https://cdn.skypack.dev)
 
-````html
+```html
 <script type="module">
   import { createOAuthAppAuth } from "https://cdn.skypack.dev/@octokit/auth-oauth-app";
 </script>
+```
 
 </td></tr>
 <tr><th>
@@ -60,7 +61,7 @@ Install with <code>npm install @octokit/auth-oauth-app</code>
 ```js
 const { createOAuthAppAuth } = require("@octokit/auth-oauth-app");
 // or: import { createOAuthAppAuth } from "@octokit/auth-oauth-app";
-````
+```
 
 </td></tr>
 </tbody>
@@ -185,11 +186,12 @@ Browsers
 
 If you know what you are doing, load `@octokit/auth-oauth-app` and `@octokit/core` (or a compatible module) directly from [cdn.skypack.dev](https://cdn.skypack.dev)
 
-````html
+```html
 <script type="module">
   import { createOAuthAppAuth } from "https://cdn.skypack.dev/@octokit/auth-oauth-app";
   import { Octokit } from "https://cdn.skypack.dev/@octokit/core";
 </script>
+```
 
 </td></tr>
 <tr><th>
@@ -1046,4 +1048,7 @@ See also: [octokit/oauth-authorization-url.js](https://github.com/octokit/oauth-
 ## License
 
 [MIT](LICENSE)
-````
+
+```
+
+```
