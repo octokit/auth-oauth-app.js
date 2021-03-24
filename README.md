@@ -41,7 +41,14 @@ It implements authentication using an OAuth app’s client ID and secret as well
 Browsers
 </th><td width=100%>
 
-`@octokit/auth-oauth-app` is not meant for usage in the browser. The OAuth APIs to create tokens do not have CORS enabled, and a client secret must not be exposed to the client.
+⚠️ `@octokit/auth-oauth-app` is not meant for usage in the browser. The OAuth APIs to create tokens do not have CORS enabled, and a client secret must not be exposed to the client.
+
+If you know what you are doing, load `@octokit/auth-oauth-app` directly from [cdn.skypack.dev](https://cdn.skypack.dev)
+
+````html
+<script type="module">
+  import { createOAuthAppAuth } from "https://cdn.skypack.dev/@octokit/auth-oauth-app";
+</script>
 
 </td></tr>
 <tr><th>
@@ -53,7 +60,7 @@ Install with <code>npm install @octokit/auth-oauth-app</code>
 ```js
 const { createOAuthAppAuth } = require("@octokit/auth-oauth-app");
 // or: import { createOAuthAppAuth } from "@octokit/auth-oauth-app";
-```
+````
 
 </td></tr>
 </tbody>
@@ -174,7 +181,15 @@ Browsers
 
 </th><td width=100%>
 
-`@octokit/auth-oauth-app` is not meant for usage in the browser. The OAuth APIs to create tokens do not have CORS enabled, and a client secret must not be exposed to the client.
+⚠️ `@octokit/auth-oauth-app` is not meant for usage in the browser. The OAuth APIs to create tokens do not have CORS enabled, and a client secret must not be exposed to the client.
+
+If you know what you are doing, load `@octokit/auth-oauth-app` and `@octokit/core` (or a compatible module) directly from [cdn.skypack.dev](https://cdn.skypack.dev)
+
+````html
+<script type="module">
+  import { createOAuthAppAuth } from "https://cdn.skypack.dev/@octokit/auth-oauth-app";
+  import { Octokit } from "https://cdn.skypack.dev/@octokit/core";
+</script>
 
 </td></tr>
 <tr><th>
@@ -396,7 +411,7 @@ Exchange `code` for a user access token. See [Web application flow](https://docs
         <code>string</code>
       </th>
       <td>
-        The URL in your application where users are sent after authorization. See <a href="https://developer.github.com/apps/building-oauth-apps/authorizing-oauth-apps/#redirect-urls">redirect urls</a>. 
+        The URL in your application where users are sent after authorization. See <a href="https://developer.github.com/apps/building-oauth-apps/authorizing-oauth-apps/#redirect-urls">redirect urls</a>.
       </td>
     </tr>
     <tr>
@@ -1031,3 +1046,4 @@ See also: [octokit/oauth-authorization-url.js](https://github.com/octokit/oauth-
 ## License
 
 [MIT](LICENSE)
+````
