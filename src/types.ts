@@ -62,7 +62,8 @@ export type AppAuthentication = {
 
 export type OAuthAppUserAuthentication = AuthOAuthUser.OAuthAppAuthentication;
 export type GitHubAppUserAuthentication = AuthOAuthUser.GitHubAppAuthentication;
-export type GitHubAppUserAuthenticationWithExpiration = AuthOAuthUser.GitHubAppAuthenticationWithExpiration;
+export type GitHubAppUserAuthenticationWithExpiration =
+  AuthOAuthUser.GitHubAppAuthenticationWithExpiration;
 
 export type FactoryOAuthAppWebFlowOptions = OAuthAppStrategyOptions &
   Omit<WebFlowAuthOptions, "type"> & { clientType: "oauth-app" };
