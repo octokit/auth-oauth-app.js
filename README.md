@@ -18,7 +18,7 @@ It implements authentication using an OAuth app’s client ID and secret as well
 - [Usage with Octokit](#usage-with-octokit)
 - [`createOAuthAppAuth(options)` or `new Octokit({ auth })`](#createoauthappauthoptions-or-new-octokit-auth-)
 - [`auth(options)` or `octokit.auth(options)`](#authoptions-or-octokitauthoptions)
-  - [Client ID/Client Secret Basic authentication](#client-idclient-server-basic-authentication)
+  - [Client ID/Client Secret Basic authentication](#client-idclient-secret-basic-authentication)
   - [OAuth web flow](#oauth-web-flow)
   - [OAuth device flow](#oauth-device-flow)
 - [Authentication object](#authentication-object)
@@ -520,7 +520,7 @@ const auth = auth({
     console.log("Open %s", verification.verification_uri);
     console.log("Enter code: %s", verification.user_code);
 
-    await prompt("press enter when you are ready to continue")
+    await prompt("press enter when you are ready to continue");
   },
 });
 ```
