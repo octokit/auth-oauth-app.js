@@ -18,7 +18,7 @@ It implements authentication using an OAuth app’s client ID and secret as well
 - [Usage with Octokit](#usage-with-octokit)
 - [`createOAuthAppAuth(options)` or `new Octokit({ auth })`](#createoauthappauthoptions-or-new-octokit-auth-)
 - [`auth(options)` or `octokit.auth(options)`](#authoptions-or-octokitauthoptions)
-  - [Client ID/Client Secret Basic authentication](#client-idclient-server-basic-authentication)
+  - [Client ID/Client Secret Basic authentication](#client-idclient-secret-basic-authentication)
   - [OAuth web flow](#oauth-web-flow)
   - [OAuth device flow](#oauth-device-flow)
 - [Authentication object](#authentication-object)
