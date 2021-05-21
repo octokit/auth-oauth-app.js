@@ -636,7 +636,7 @@ test("auth.hook(request, 'GET /user)", async () => {
   );
 });
 
-test("auth.hook(request, 'GET /user)", async () => {
+test("auth.hook(request, 'GET /repos/{owner}/{repo})", async () => {
   const mock = fetchMock
     .sandbox()
     .getOnce("https://api.github.com/repos/octokit/octokit.js", {
@@ -660,4 +660,31 @@ test("auth.hook(request, 'GET /user)", async () => {
     repo: "octokit.js",
   });
   expect(data).toStrictEqual({ ok: true });
+});
+
+test("auth.hook(request, 'GET /repos/{owner}/{repo}) as GitHub App", async () => {
+  const mock = fetchMock
+    .sandbox()
+    .getOnce("https://api.github.com/repos/octokit/octokit.js", {
+      ok: true,
+    });
+
+  const auth = createOAuthAppAuth({
+    clientType: "github-app",
+    clientId: "lv1.1234567890abcdef",
+    clientSecret: "1234567890abcdef1234567890abcdef12345678",
+  });
+
+  const requestWithAuth = request.defaults({
+    request: {
+      fetch: mock,
+      hook: auth.hook,
+    },
+  });
+
+  await expect(async () =>
+    requestWithAuth("GET /repos/{owner}/{repo}")
+  ).rejects.toThrow(
+    '[@octokit/auth-oauth-app] GitHub Apps cannot use their client ID/secret for basic authentication for endpoints other than "/applications/{client_id}/**". "GET /repos/{owner}/{repo}" is not supported.'
+  );
 });
