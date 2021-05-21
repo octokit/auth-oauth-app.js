@@ -615,13 +615,24 @@ test("auth.hook(request, 'POST /applications/{client_id}/token') checks token", 
 });
 
 test("auth.hook(request, 'GET /user)", async () => {
+  const mock = fetchMock.sandbox().getOnce("https://api.github.com/user", {
+    status: 401,
+  });
+
   const auth = createOAuthAppAuth({
     clientId: "12345678901234567890",
     clientSecret: "1234567890123456789012345678901234567890",
   });
 
-  await expect(async () => auth.hook(request, "GET /user")).rejects.toThrow(
-    '[@octokit/auth-oauth-app] "GET /user" does not support clientId/clientSecret basic authentication. Use @octokit/auth-oauth-user instead.'
+  const requestWithAuth = request.defaults({
+    request: {
+      fetch: mock,
+      hook: auth.hook,
+    },
+  });
+
+  await expect(async () => requestWithAuth("GET /user")).rejects.toThrow(
+    '[@octokit/auth-oauth-app] "GET /user" does not support clientId/clientSecret basic authentication'
   );
 });
 
