@@ -615,12 +615,76 @@ test("auth.hook(request, 'POST /applications/{client_id}/token') checks token", 
 });
 
 test("auth.hook(request, 'GET /user)", async () => {
+  const mock = fetchMock.sandbox().getOnce("https://api.github.com/user", {
+    status: 401,
+  });
+
   const auth = createOAuthAppAuth({
     clientId: "12345678901234567890",
     clientSecret: "1234567890123456789012345678901234567890",
   });
 
-  await expect(async () => auth.hook(request, "GET /user")).rejects.toThrow(
-    '[@octokit/auth-oauth-app] "GET /user" does not support clientId/clientSecret basic authentication. Use @octokit/auth-oauth-user instead.'
+  const requestWithAuth = request.defaults({
+    request: {
+      fetch: mock,
+      hook: auth.hook,
+    },
+  });
+
+  await expect(async () => requestWithAuth("GET /user")).rejects.toThrow(
+    '[@octokit/auth-oauth-app] "GET /user" does not support clientId/clientSecret basic authentication'
+  );
+});
+
+test("auth.hook(request, 'GET /repos/{owner}/{repo})", async () => {
+  const mock = fetchMock
+    .sandbox()
+    .getOnce("https://api.github.com/repos/octokit/octokit.js", {
+      ok: true,
+    });
+
+  const auth = createOAuthAppAuth({
+    clientId: "12345678901234567890",
+    clientSecret: "1234567890123456789012345678901234567890",
+  });
+
+  const requestWithAuth = request.defaults({
+    request: {
+      fetch: mock,
+      hook: auth.hook,
+    },
+  });
+
+  const { data } = await requestWithAuth("GET /repos/{owner}/{repo}", {
+    owner: "octokit",
+    repo: "octokit.js",
+  });
+  expect(data).toStrictEqual({ ok: true });
+});
+
+test("auth.hook(request, 'GET /repos/{owner}/{repo}) as GitHub App", async () => {
+  const mock = fetchMock
+    .sandbox()
+    .getOnce("https://api.github.com/repos/octokit/octokit.js", {
+      ok: true,
+    });
+
+  const auth = createOAuthAppAuth({
+    clientType: "github-app",
+    clientId: "lv1.1234567890abcdef",
+    clientSecret: "1234567890abcdef1234567890abcdef12345678",
+  });
+
+  const requestWithAuth = request.defaults({
+    request: {
+      fetch: mock,
+      hook: auth.hook,
+    },
+  });
+
+  await expect(async () =>
+    requestWithAuth("GET /repos/{owner}/{repo}")
+  ).rejects.toThrow(
+    '[@octokit/auth-oauth-app] GitHub Apps cannot use their client ID/secret for basic authentication for endpoints other than "/applications/{client_id}/**". "GET /repos/{owner}/{repo}" is not supported.'
   );
 });

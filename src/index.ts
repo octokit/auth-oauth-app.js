@@ -56,7 +56,6 @@ export function createOAuthAppAuth(
 
   // @ts-expect-error not worth the extra code to appease TS
   return Object.assign(auth.bind(null, state), {
-    // @ts-expect-error not worth the extra code to appease TS
     hook: hook.bind(null, state),
   });
 }

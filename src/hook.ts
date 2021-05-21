@@ -29,14 +29,22 @@ export async function hook(
     return request(endpoint);
   }
 
-  if (!requiresBasicAuth(endpoint.url)) {
+  if (state.clientType === "github-app" && !requiresBasicAuth(endpoint.url)) {
     throw new Error(
-      `[@octokit/auth-oauth-app] "${endpoint.method} ${endpoint.url}" does not support clientId/clientSecret basic authentication. Use @octokit/auth-oauth-user instead.`
+      `[@octokit/auth-oauth-app] GitHub Apps cannot use their client ID/secret for basic authentication for endpoints other than "/applications/{client_id}/**". "${endpoint.method} ${endpoint.url}" is not supported.`
     );
   }
 
   const credentials = btoa(`${state.clientId}:${state.clientSecret}`);
   endpoint.headers.authorization = `basic ${credentials}`;
 
-  return await request(endpoint);
+  try {
+    return await request(endpoint);
+  } catch (error) {
+    /* istanbul ignore if */
+    if (error.status !== 401) throw error;
+
+    error.message = `[@octokit/auth-oauth-app] "${endpoint.method} ${endpoint.url}" does not support clientId/clientSecret basic authentication.`;
+    throw error;
+  }
 }
