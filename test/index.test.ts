@@ -624,3 +624,29 @@ test("auth.hook(request, 'GET /user)", async () => {
     '[@octokit/auth-oauth-app] "GET /user" does not support clientId/clientSecret basic authentication. Use @octokit/auth-oauth-user instead.'
   );
 });
+
+test("auth.hook(request, 'GET /user)", async () => {
+  const mock = fetchMock
+    .sandbox()
+    .getOnce("https://api.github.com/repos/octokit/octokit.js", {
+      ok: true,
+    });
+
+  const auth = createOAuthAppAuth({
+    clientId: "12345678901234567890",
+    clientSecret: "1234567890123456789012345678901234567890",
+  });
+
+  const requestWithAuth = request.defaults({
+    request: {
+      fetch: mock,
+      hook: auth.hook,
+    },
+  });
+
+  const { data } = await requestWithAuth("GET /repos/{owner}/{repo}", {
+    owner: "octokit",
+    repo: "octokit.js",
+  });
+  expect(data).toStrictEqual({ ok: true });
+});
