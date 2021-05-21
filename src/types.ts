@@ -149,7 +149,7 @@ export type OAuthAppState = OAuthAppStrategyOptions & {
   clientType: "oauth-app";
   request: RequestInterface;
 };
-export type GitHubAppState = OAuthAppStrategyOptions & {
+export type GitHubAppState = GitHubAppStrategyOptions & {
   clientType: "github-app";
   request: RequestInterface;
 };
