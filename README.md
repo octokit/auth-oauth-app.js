@@ -234,7 +234,7 @@ console.log("token is valid");
 const userOctokit = await appOctokit.auth({
   type: "oauth-user",
   code: "code123",
-  factor: (options) => {
+  factory: (options) => {
     return new Octokit({
       authStrategy: createOAuthUserAuth,
       auth: options,
