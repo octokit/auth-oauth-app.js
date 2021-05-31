@@ -70,11 +70,9 @@ export type FactoryOAuthAppWebFlowOptions = OAuthAppStrategyOptions &
 export type FactoryOAuthAppDeviceFlowOptions = OAuthAppStrategyOptions &
   Omit<OAuthAppDeviceFlowAuthOptions, "type"> & { clientType: "oauth-app" };
 export type FactoryGitHubAppWebFlowOptions = GitHubAppStrategyOptions &
-  Omit<WebFlowAuthOptions, "type"> & { clientType: "github-app" };
+  Omit<WebFlowAuthOptions, "type">;
 export type FactoryGitHubAppDeviceFlowOptions = GitHubAppStrategyOptions &
-  Omit<GitHubAppDeviceFlowAuthOptions, "type"> & {
-    clientType: "github-app";
-  };
+  Omit<GitHubAppDeviceFlowAuthOptions, "type">;
 
 export interface FactoryOAuthAppWebFlow<T> {
   (options: FactoryOAuthAppWebFlowOptions): T;
