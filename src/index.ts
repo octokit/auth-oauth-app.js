@@ -28,6 +28,9 @@ export {
   OAuthAppUserAuthentication,
   GitHubAppUserAuthentication,
   GitHubAppUserAuthenticationWithExpiration,
+  // needed by @octokit/auth-app
+  FactoryGitHubWebFlow,
+  FactoryGitHubDeviceFlow,
 } from "./types";
 export { createOAuthUserAuth } from "@octokit/auth-oauth-user";
 
