@@ -40,7 +40,7 @@ export async function hook(
 
   try {
     return await request(endpoint);
-  } catch (error) {
+  } catch (error: any) {
     /* istanbul ignore if */
     if (error.status !== 401) throw error;
 
