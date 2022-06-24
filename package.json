@@ -6,7 +6,7 @@
   "version": "0.0.0-development",
   "description": "GitHub OAuth App authentication for JavaScript",
   "scripts": {
-    "build": "pika build",
+    "build": "pika-pack build",
     "lint": "prettier --check '{src,test}/**/*' README.md package.json",
     "lint:fix": "prettier --write '{src,test}/**/*' README.md package.json",
     "pretest": "npm run -s lint",
