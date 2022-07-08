@@ -24,15 +24,15 @@
   "license": "MIT",
   "dependencies": {
     "@octokit/auth-oauth-device": "^3.1.1",
-    "@octokit/auth-oauth-user": "^1.2.1",
-    "@octokit/request": "^6.0.0",
+    "@octokit/auth-oauth-user": "^2.0.0",
+    "@octokit/request": "^5.6.3",
     "@octokit/types": "^6.0.3",
     "@types/btoa-lite": "^1.0.0",
     "btoa-lite": "^1.0.0",
     "universal-user-agent": "^6.0.0"
   },
   "devDependencies": {
-    "@octokit/core": "^3.3.1",
+    "@octokit/core": "^4.0.0",
     "@pika/pack": "^0.5.0",
     "@pika/plugin-build-node": "^0.9.0",
     "@pika/plugin-build-web": "^0.9.0",
@@ -63,7 +63,10 @@
         "@pika/plugin-ts-standard-pkg"
       ],
       [
-        "@pika/plugin-build-node"
+        "@pika/plugin-build-node",
+        {
+          "minNodeVersion": "14"
+        }
       ],
       [
         "@pika/plugin-build-web"
@@ -97,5 +100,8 @@
     "extends": [
       "github>octokit/.github"
     ]
+  },
+  "engines": {
+    "node": ">= 14"
   }
 }
