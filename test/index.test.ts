@@ -358,7 +358,6 @@ test("GitHub App", async () => {
         client_id: "lv1.1234567890abcdef",
         client_secret: "1234567890abcdef1234567890abcdef12345678",
         code: "random123",
-        state: "mystate123",
       },
     }
   );
