@@ -43,7 +43,6 @@ test("README web flow example", async () => {
         client_id: "123",
         client_secret: "secret",
         code: "random123",
-        state: "mystate123",
       },
     }
   );
@@ -64,7 +63,6 @@ test("README web flow example", async () => {
   const authentication = await auth({
     type: "oauth-user",
     code: "random123",
-    state: "mystate123",
   });
 
   expect(authentication).toEqual({
