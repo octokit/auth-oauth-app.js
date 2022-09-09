@@ -489,7 +489,7 @@ test("request with custom baseUrl (GHE)", async () => {
   });
 
   expect(authentication).toMatchInlineSnapshot(`
-    Object {
+    {
       "clientId": "123",
       "clientSecret": "secret",
       "clientType": "oauth-app",
