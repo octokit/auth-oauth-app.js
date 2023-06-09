@@ -3,7 +3,7 @@ import { request } from "@octokit/request";
 
 import { auth } from "./auth";
 import { hook } from "./hook";
-import {
+import type {
   OAuthAppStrategyOptions,
   GitHubAppStrategyOptions,
   OAuthAppAuthInterface,
@@ -11,7 +11,7 @@ import {
 } from "./types";
 import { VERSION } from "./version";
 
-export {
+export type {
   // strategy options
   OAuthAppStrategyOptions,
   GitHubAppStrategyOptions,
