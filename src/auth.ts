@@ -1,7 +1,7 @@
 import btoa from "btoa-lite";
 import { createOAuthUserAuth } from "@octokit/auth-oauth-user";
 
-import {
+import type {
   // state
   OAuthAppState,
   GitHubAppState,
