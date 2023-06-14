@@ -43,11 +43,11 @@ Browsers
 
 ⚠️ `@octokit/auth-oauth-app` is not meant for usage in the browser. The OAuth APIs to create tokens do not have CORS enabled, and a client secret must not be exposed to the client.
 
-If you know what you are doing, load `@octokit/auth-oauth-app` directly from [cdn.skypack.dev](https://cdn.skypack.dev)
+If you know what you are doing, load `@octokit/auth-oauth-app` directly from [esm.sh](https://esm.sh)
 
 ```html
 <script type="module">
-  import { createOAuthAppAuth } from "https://cdn.skypack.dev/@octokit/auth-oauth-app";
+  import { createOAuthAppAuth } from "https://esm.sh/@octokit/auth-oauth-app";
 </script>
 ```
 
@@ -184,12 +184,12 @@ Browsers
 
 ⚠️ `@octokit/auth-oauth-app` is not meant for usage in the browser. The OAuth APIs to create tokens do not have CORS enabled, and a client secret must not be exposed to the client.
 
-If you know what you are doing, load `@octokit/auth-oauth-app` and `@octokit/core` (or a compatible module) directly from [cdn.skypack.dev](https://cdn.skypack.dev)
+If you know what you are doing, load `@octokit/auth-oauth-app` and `@octokit/core` (or a compatible module) directly from [esm.sh](https://esm.sh)
 
 ```html
 <script type="module">
-  import { createOAuthAppAuth } from "https://cdn.skypack.dev/@octokit/auth-oauth-app";
-  import { Octokit } from "https://cdn.skypack.dev/@octokit/core";
+  import { createOAuthAppAuth } from "https://esm.sh/@octokit/auth-oauth-app";
+  import { Octokit } from "https://esm.sh/@octokit/core";
 </script>
 ```
 
