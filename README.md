@@ -980,7 +980,7 @@ const { data: user } = await auth.hook(
   {
     client_id: "1234567890abcdef1234",
     access_token: "token123",
-  }
+  },
 );
 ```
 
@@ -998,7 +998,7 @@ const { data: user } = await requestWithAuth(
   {
     client_id: "1234567890abcdef1234",
     access_token: "token123",
-  }
+  },
 );
 ```
 
