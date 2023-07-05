@@ -24,25 +24,25 @@ import type {
 //  App authentication
 export async function auth(
   state: OAuthAppState | GitHubAppState,
-  authOptions: AppAuthOptions
+  authOptions: AppAuthOptions,
 ): Promise<AppAuthentication>;
 
 // OAuth App Web flow
 export async function auth(
   state: OAuthAppState,
-  authOptions: WebFlowAuthOptions
+  authOptions: WebFlowAuthOptions,
 ): Promise<OAuthAppUserAuthentication>;
 
 // OAuth App Web flow with `factory` option
 export async function auth<T = unknown>(
   state: OAuthAppState,
-  authOptions: WebFlowAuthOptions & { factory: FactoryOAuthAppWebFlow<T> }
+  authOptions: WebFlowAuthOptions & { factory: FactoryOAuthAppWebFlow<T> },
 ): Promise<T>;
 
 // Oauth App Device Flow
 export async function auth(
   state: OAuthAppState,
-  authOptions: OAuthAppDeviceFlowAuthOptions
+  authOptions: OAuthAppDeviceFlowAuthOptions,
 ): Promise<OAuthAppUserAuthentication>;
 
 // OAuth App Device flow with `factory` option
@@ -50,13 +50,13 @@ export async function auth<T = unknown>(
   state: OAuthAppState,
   authOptions: OAuthAppDeviceFlowAuthOptions & {
     factory: FactoryOAuthAppDeviceFlow<T>;
-  }
+  },
 ): Promise<T>;
 
 // GitHub App Web flow
 export async function auth(
   state: GitHubAppState,
-  authOptions: WebFlowAuthOptions
+  authOptions: WebFlowAuthOptions,
 ): Promise<
   GitHubAppUserAuthentication | GitHubAppUserAuthenticationWithExpiration
 >;
@@ -64,13 +64,13 @@ export async function auth(
 // GitHub App Web flow with `factory` option
 export async function auth<T = unknown>(
   state: GitHubAppState,
-  authOptions: WebFlowAuthOptions & { factory: FactoryGitHubWebFlow<T> }
+  authOptions: WebFlowAuthOptions & { factory: FactoryGitHubWebFlow<T> },
 ): Promise<T>;
 
 // GitHub App Device Flow
 export async function auth(
   state: GitHubAppState,
-  authOptions: GitHubAppDeviceFlowAuthOptions
+  authOptions: GitHubAppDeviceFlowAuthOptions,
 ): Promise<
   GitHubAppUserAuthentication | GitHubAppUserAuthenticationWithExpiration
 >;
@@ -80,7 +80,7 @@ export async function auth<T = unknown>(
   state: GitHubAppState,
   authOptions: GitHubAppDeviceFlowAuthOptions & {
     factory: FactoryGitHubDeviceFlow<T>;
-  }
+  },
 ): Promise<T>;
 
 export async function auth<T = unknown>(
@@ -97,7 +97,7 @@ export async function auth<T = unknown>(
     | (WebFlowAuthOptions & { factory: FactoryGitHubWebFlow<T> })
     | (GitHubAppDeviceFlowAuthOptions & {
         factory: FactoryGitHubDeviceFlow<T>;
-      })
+      }),
 ): Promise<
   | AppAuthentication
   | OAuthAppUserAuthentication
@@ -113,7 +113,7 @@ export async function auth<T = unknown>(
       clientType: state.clientType,
       headers: {
         authorization: `basic ${btoa(
-          `${state.clientId}:${state.clientSecret}`
+          `${state.clientId}:${state.clientSecret}`,
         )}`,
       },
     };

@@ -93,12 +93,12 @@ export interface OAuthAppAuthInterface {
 
   // user auth with `factory` option
   <T = unknown>(
-    options: WebFlowAuthOptions & { factory: FactoryOAuthAppWebFlow<T> }
+    options: WebFlowAuthOptions & { factory: FactoryOAuthAppWebFlow<T> },
   ): Promise<T>;
   <T = unknown>(
     options: OAuthAppDeviceFlowAuthOptions & {
       factory: FactoryOAuthAppDeviceFlow<T>;
-    }
+    },
   ): Promise<T>;
 
   // user auth without `factory` option
@@ -108,7 +108,7 @@ export interface OAuthAppAuthInterface {
   hook(
     request: RequestInterface,
     route: Route | EndpointOptions,
-    parameters?: RequestParameters
+    parameters?: RequestParameters,
   ): Promise<OctokitResponse<any>>;
 }
 
@@ -118,26 +118,30 @@ export interface GitHubAuthInterface {
 
   // user auth with `factory` option
   <T = unknown>(
-    options: WebFlowAuthOptions & { factory: FactoryGitHubWebFlow<T> }
+    options: WebFlowAuthOptions & { factory: FactoryGitHubWebFlow<T> },
   ): Promise<T>;
   <T = unknown>(
     options: GitHubAppDeviceFlowAuthOptions & {
       factory: FactoryGitHubDeviceFlow<T>;
-    }
+    },
   ): Promise<T>;
 
   // user auth without `factory` option
-  (options?: WebFlowAuthOptions): Promise<
+  (
+    options?: WebFlowAuthOptions,
+  ): Promise<
     GitHubAppUserAuthentication | GitHubAppUserAuthenticationWithExpiration
   >;
-  (options?: GitHubAppDeviceFlowAuthOptions): Promise<
+  (
+    options?: GitHubAppDeviceFlowAuthOptions,
+  ): Promise<
     GitHubAppUserAuthentication | GitHubAppUserAuthenticationWithExpiration
   >;
 
   hook(
     request: RequestInterface,
     route: Route | EndpointOptions,
-    parameters?: RequestParameters
+    parameters?: RequestParameters,
   ): Promise<OctokitResponse<any>>;
 }
 

@@ -44,7 +44,7 @@ test("README web flow example", async () => {
         client_secret: "secret",
         code: "random123",
       },
-    }
+    },
   );
 
   const auth = createOAuthAppAuth({
@@ -100,7 +100,7 @@ test("README device flow example", async () => {
           client_id: "1234567890abcdef1234",
           scope: "",
         },
-      }
+      },
     )
     .postOnce(
       "https://github.com/login/oauth/access_token",
@@ -120,7 +120,7 @@ test("README device flow example", async () => {
           grant_type: "urn:ietf:params:oauth:grant-type:device_code",
         },
         overwriteRoutes: false,
-      }
+      },
     );
 
   const auth = createOAuthAppAuth({
@@ -186,7 +186,7 @@ test("device flow with scopes", async () => {
           client_id: "1234567890abcdef1234",
           scope: "repo gist",
         },
-      }
+      },
     )
     .postOnce(
       "https://github.com/login/oauth/access_token",
@@ -206,7 +206,7 @@ test("device flow with scopes", async () => {
           grant_type: "urn:ietf:params:oauth:grant-type:device_code",
         },
         overwriteRoutes: false,
-      }
+      },
     );
 
   const auth = createOAuthAppAuth({
@@ -256,7 +256,7 @@ test("README Octokit usage example", async () => {
       expect.objectContaining({
         accept: "application/vnd.github.v3+json",
         authorization: "token token123",
-      })
+      }),
     );
 
     return true;
@@ -272,7 +272,7 @@ test("README Octokit usage example", async () => {
         body: {
           access_token: "existingtoken123",
         },
-      }
+      },
     )
 
     .postOnce(
@@ -287,7 +287,7 @@ test("README Octokit usage example", async () => {
           client_secret: "1234567890abcdef1234567890abcdef12345678",
           code: "code123",
         },
-      }
+      },
     )
 
     .getOnce(matchGetUserRequest, {
@@ -312,7 +312,7 @@ test("README Octokit usage example", async () => {
     {
       client_id: "1234567890abcdef1234",
       access_token: "existingtoken123",
-    }
+    },
   );
   expect(data).toEqual({ ok: true });
 
@@ -359,7 +359,7 @@ test("GitHub App", async () => {
         client_secret: "1234567890abcdef1234567890abcdef12345678",
         code: "random123",
       },
-    }
+    },
   );
 
   const auth = createOAuthAppAuth({
@@ -411,7 +411,7 @@ test("`factory` auth option", async () => {
         client_secret: "1234567890abcdef1234567890abcdef12345678",
         code: "random123",
       },
-    }
+    },
   );
 
   const appAuth = createOAuthAppAuth({
@@ -466,7 +466,7 @@ test("request with custom baseUrl (GHE)", async () => {
         client_secret: "secret",
         code: "random123",
       },
-    }
+    },
   );
 
   const auth = createOAuthAppAuth({
@@ -509,7 +509,7 @@ test("auth.hook with custom baseUrl (GHE)", async () => {
       body: {
         access_token: "secret123",
       },
-    }
+    },
   );
 
   const auth = createOAuthAppAuth({
@@ -531,7 +531,7 @@ test("auth.hook with custom baseUrl (GHE)", async () => {
     {
       client_id: "123",
       access_token: "secret123",
-    }
+    },
   );
 
   expect(data).toEqual({
@@ -585,7 +585,7 @@ test("auth.hook(request, 'POST /applications/{client_id}/token') checks token", 
         body: {
           access_token: "secret123",
         },
-      }
+      },
     );
 
   const auth = createOAuthAppAuth({
@@ -605,7 +605,7 @@ test("auth.hook(request, 'POST /applications/{client_id}/token') checks token", 
     {
       client_id: "123",
       access_token: "secret123",
-    }
+    },
   );
 
   expect(response.data.token).toEqual("secret123");
@@ -629,7 +629,7 @@ test("auth.hook(request, 'GET /user)", async () => {
   });
 
   await expect(async () => requestWithAuth("GET /user")).rejects.toThrow(
-    '[@octokit/auth-oauth-app] "GET /user" does not support clientId/clientSecret basic authentication'
+    '[@octokit/auth-oauth-app] "GET /user" does not support clientId/clientSecret basic authentication',
   );
 });
 
@@ -680,8 +680,8 @@ test("auth.hook(request, 'GET /repos/{owner}/{repo}) as GitHub App", async () =>
   });
 
   await expect(async () =>
-    requestWithAuth("GET /repos/{owner}/{repo}")
+    requestWithAuth("GET /repos/{owner}/{repo}"),
   ).rejects.toThrow(
-    '[@octokit/auth-oauth-app] GitHub Apps cannot use their client ID/secret for basic authentication for endpoints other than "/applications/{client_id}/**". "GET /repos/{owner}/{repo}" is not supported.'
+    '[@octokit/auth-oauth-app] GitHub Apps cannot use their client ID/secret for basic authentication for endpoints other than "/applications/{client_id}/**". "GET /repos/{owner}/{repo}" is not supported.',
   );
 });
