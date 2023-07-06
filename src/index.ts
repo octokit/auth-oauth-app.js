@@ -35,15 +35,15 @@ export type {
 export { createOAuthUserAuth } from "@octokit/auth-oauth-user";
 
 export function createOAuthAppAuth(
-  options: OAuthAppStrategyOptions
+  options: OAuthAppStrategyOptions,
 ): OAuthAppAuthInterface;
 
 export function createOAuthAppAuth(
-  options: GitHubAppStrategyOptions
+  options: GitHubAppStrategyOptions,
 ): GitHubAuthInterface;
 
 export function createOAuthAppAuth(
-  options: OAuthAppStrategyOptions | GitHubAppStrategyOptions
+  options: OAuthAppStrategyOptions | GitHubAppStrategyOptions,
 ): OAuthAppAuthInterface | GitHubAuthInterface {
   const state = Object.assign(
     {
@@ -54,7 +54,7 @@ export function createOAuthAppAuth(
       }),
       clientType: "oauth-app",
     },
-    options
+    options,
   );
 
   // @ts-expect-error not worth the extra code to appease TS

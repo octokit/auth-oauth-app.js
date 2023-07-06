@@ -15,11 +15,11 @@ export async function hook(
   state: OAuthAppState | GitHubAppState,
   request: RequestInterface,
   route: Route | EndpointOptions,
-  parameters?: RequestParameters
+  parameters?: RequestParameters,
 ): Promise<OctokitResponse<any>> {
   let endpoint = request.endpoint.merge(
     route as string,
-    parameters
+    parameters,
   ) as EndpointDefaults & { url: string };
 
   // Do not intercept OAuth Web/Device flow request
@@ -31,7 +31,7 @@ export async function hook(
 
   if (state.clientType === "github-app" && !requiresBasicAuth(endpoint.url)) {
     throw new Error(
-      `[@octokit/auth-oauth-app] GitHub Apps cannot use their client ID/secret for basic authentication for endpoints other than "/applications/{client_id}/**". "${endpoint.method} ${endpoint.url}" is not supported.`
+      `[@octokit/auth-oauth-app] GitHub Apps cannot use their client ID/secret for basic authentication for endpoints other than "/applications/{client_id}/**". "${endpoint.method} ${endpoint.url}" is not supported.`,
     );
   }
 
