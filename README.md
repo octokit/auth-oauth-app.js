@@ -516,7 +516,7 @@ The `onVerification()` callback can be used to pause until the user completes st
 ```js
 const auth = auth({
   type: "oauth-user",
-  onVerification(verification) {
+  async onVerification(verification) {
     console.log("Open %s", verification.verification_uri);
     console.log("Enter code: %s", verification.user_code);
 
