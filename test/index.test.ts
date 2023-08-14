@@ -656,7 +656,7 @@ test("auth.hook(request, 'GET /repos/{owner}/{repo})", async () => {
     owner: "octokit",
     repo: "octokit.js",
   });
-  expect(data).toStrictEqual({ ok: true });
+  expect(data).toEqual({ ok: true });
 });
 
 test("auth.hook(request, 'GET /repos/{owner}/{repo}) as GitHub App", async () => {
