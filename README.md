@@ -438,7 +438,7 @@ Exchange `code` for a user access token. See [Web application flow](https://docs
 
 When the `factory` option is, the `auth({type: "oauth-user", code, factory })` call with resolve with whatever the `factory` function returns. The `factory` function will be called with all the strategy option that `auth` was created with, plus the additional options passed to `auth`, besides `type` and `factory`.
 
-For example, you can create a new `auth` instance for for a user using [`createOAuthUserAuth`](https://github.com/octokit/auth-oauth-user.js/#readme) which implements auto-refreshing tokens, among other features. You can import `createOAuthUserAuth` directly from `@octokit/auth-oauth-app` which will ensure compatibility.
+For example, you can create a new `auth` instance for a user using [`createOAuthUserAuth`](https://github.com/octokit/auth-oauth-user.js/#readme) which implements auto-refreshing tokens, among other features. You can import `createOAuthUserAuth` directly from `@octokit/auth-oauth-app` which will ensure compatibility.
 
 ```js
 const {
@@ -549,7 +549,7 @@ const auth = auth({
 
 When the `factory` option is, the `auth({type: "oauth-user", code, factory })` call with resolve with whatever the `factory` function returns. The `factory` function will be called with all the strategy option that `auth` was created with, plus the additional options passed to `auth`, besides `type` and `factory`.
 
-For example, you can create a new `auth` instance for for a user using [`createOAuthUserAuth`](https://github.com/octokit/auth-oauth-user.js/#readme) which implements auto-refreshing tokens, among other features. You can import `createOAuthUserAuth` directly from `@octokit/auth-oauth-app` which will ensure compatibility.
+For example, you can create a new `auth` instance for a user using [`createOAuthUserAuth`](https://github.com/octokit/auth-oauth-user.js/#readme) which implements auto-refreshing tokens, among other features. You can import `createOAuthUserAuth` directly from `@octokit/auth-oauth-app` which will ensure compatibility.
 
 ```js
 const {
