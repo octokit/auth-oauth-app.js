@@ -59,8 +59,7 @@ Node
 Install with <code>npm install @octokit/auth-oauth-app</code>
 
 ```js
-const { createOAuthAppAuth } = require("@octokit/auth-oauth-app");
-// or: import { createOAuthAppAuth } from "@octokit/auth-oauth-app";
+import { createOAuthAppAuth } from "@octokit/auth-oauth-app";
 ```
 
 </td></tr>
@@ -203,11 +202,11 @@ Node
 Install with `npm install @octokit/core @octokit/auth-oauth-app`. Optionally replace `@octokit/core` with a compatible module
 
 ```js
-const { Octokit } = require("@octokit/core");
-const {
+import { Octokit } from "@octokit/core";
+import {
   createOAuthAppAuth,
   createOAuthUserAuth,
-} = require("@octokit/auth-oauth-app");
+} from "@octokit/auth-oauth-app";
 ```
 
 </td></tr>
@@ -313,7 +312,7 @@ The `createOAuthAppAuth` method accepts a single `options` object as argument. T
         You can pass in your own <a href="https://github.com/octokit/request.js"><code>@octokit/request</code></a> instance. For usage with enterprise, set <code>baseUrl</code> to the API root endpoint. Example:
 
 ```js
-const { request } = require("@octokit/request");
+import { request } from "@octokit/request";
 createOAuthAppAuth({
   clientId: "1234567890abcdef1234",
   clientSecret: "1234567890abcdef1234567890abcdef12345678",
@@ -441,10 +440,10 @@ When the `factory` option is, the `auth({type: "oauth-user", code, factory })` c
 For example, you can create a new `auth` instance for a user using [`createOAuthUserAuth`](https://github.com/octokit/auth-oauth-user.js/#readme) which implements auto-refreshing tokens, among other features. You can import `createOAuthUserAuth` directly from `@octokit/auth-oauth-app` which will ensure compatibility.
 
 ```js
-const {
+import {
   createOAuthAppAuth,
   createOAuthUserAuth,
-} = require("@octokit/auth-oauth-app");
+} from "@octokit/auth-oauth-app";
 
 const appAuth = createOAuthAppAuth({
   clientType: "github-app",
@@ -552,10 +551,10 @@ When the `factory` option is, the `auth({type: "oauth-user", code, factory })` c
 For example, you can create a new `auth` instance for a user using [`createOAuthUserAuth`](https://github.com/octokit/auth-oauth-user.js/#readme) which implements auto-refreshing tokens, among other features. You can import `createOAuthUserAuth` directly from `@octokit/auth-oauth-app` which will ensure compatibility.
 
 ```js
-const {
+import {
   createOAuthAppAuth,
   createOAuthUserAuth,
-} = require("@octokit/auth-oauth-app");
+} from "@octokit/auth-oauth-app";
 
 const appAuth = createOAuthAppAuth({
   clientType: "github-app",

@@ -1,4 +1,3 @@
-import btoa from "btoa-lite";
 import { createOAuthUserAuth } from "@octokit/auth-oauth-user";
 
 import type {
@@ -19,7 +18,7 @@ import type {
   OAuthAppUserAuthentication,
   GitHubAppUserAuthentication,
   GitHubAppUserAuthenticationWithExpiration,
-} from "./types";
+} from "./types.js";
 
 //  App authentication
 export async function auth(
