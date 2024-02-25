@@ -1,8 +1,9 @@
-import fetchMock, { MockMatcherFunction } from "fetch-mock";
+import fetchMock, { type MockMatcherFunction } from "fetch-mock";
 import { request } from "@octokit/request";
 import { Octokit } from "@octokit/core";
+import { jest } from "@jest/globals";
 
-import { createOAuthAppAuth, createOAuthUserAuth } from "../src/index";
+import { createOAuthAppAuth, createOAuthUserAuth } from "../src/index.js";
 
 test("README example with {type: 'oauth-app'}", async () => {
   const auth = createOAuthAppAuth({

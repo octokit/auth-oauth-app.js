@@ -1,4 +1,3 @@
-import btoa from "btoa-lite";
 import { requiresBasicAuth } from "@octokit/auth-oauth-user";
 import type {
   EndpointDefaults,
@@ -9,7 +8,7 @@ import type {
   OctokitResponse,
 } from "@octokit/types";
 
-import type { OAuthAppState, GitHubAppState } from "./types";
+import type { OAuthAppState, GitHubAppState } from "./types.js";
 
 export async function hook(
   state: OAuthAppState | GitHubAppState,

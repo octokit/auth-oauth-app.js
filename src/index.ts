@@ -1,15 +1,15 @@
 import { getUserAgent } from "universal-user-agent";
 import { request } from "@octokit/request";
 
-import { auth } from "./auth";
-import { hook } from "./hook";
+import { auth } from "./auth.js";
+import { hook } from "./hook.js";
 import type {
   OAuthAppStrategyOptions,
   GitHubAppStrategyOptions,
   OAuthAppAuthInterface,
   GitHubAuthInterface,
-} from "./types";
-import { VERSION } from "./version";
+} from "./types.js";
+import { VERSION } from "./version.js";
 
 export type {
   // strategy options
@@ -31,7 +31,7 @@ export type {
   // needed by @octokit/auth-app
   FactoryGitHubWebFlow,
   FactoryGitHubDeviceFlow,
-} from "./types";
+} from "./types.js";
 export { createOAuthUserAuth } from "@octokit/auth-oauth-user";
 
 export function createOAuthAppAuth(

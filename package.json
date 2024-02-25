@@ -3,6 +3,7 @@
   "publishConfig": {
     "access": "public"
   },
+  "type": "module",
   "version": "0.0.0-development",
   "description": "GitHub OAuth App authentication for JavaScript",
   "scripts": {
@@ -10,7 +11,7 @@
     "lint": "prettier --check '{src,test,scripts}/**/*' README.md package.json",
     "lint:fix": "prettier --write '{src,test,scripts}/**/*' README.md package.json",
     "pretest": "npm run -s lint",
-    "test": "jest --coverage"
+    "test": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" npx jest --coverage"
   },
   "repository": "github:octokit/auth-oauth-app.js",
   "keywords": [
@@ -23,17 +24,15 @@
   "author": "Gregor Martynus (https://github.com/gr2m)",
   "license": "MIT",
   "dependencies": {
-    "@octokit/auth-oauth-device": "^6.0.0",
-    "@octokit/auth-oauth-user": "^4.0.0",
-    "@octokit/request": "^8.0.2",
+    "@octokit/auth-oauth-device": "^7.0.0",
+    "@octokit/auth-oauth-user": "^5.0.1",
+    "@octokit/request": "^9.0.0",
     "@octokit/types": "^12.0.0",
-    "@types/btoa-lite": "^1.0.0",
-    "btoa-lite": "^1.0.0",
-    "universal-user-agent": "^6.0.0"
+    "universal-user-agent": "^7.0.0"
   },
   "devDependencies": {
-    "@octokit/core": "^5.0.0",
-    "@octokit/tsconfig": "^2.0.0",
+    "@octokit/core": "^6.0.0",
+    "@octokit/tsconfig": "^3.0.0",
     "@types/fetch-mock": "^7.3.1",
     "@types/jest": "^29.0.0",
     "esbuild": "^0.20.0",
@@ -42,15 +41,19 @@
     "jest": "^29.0.0",
     "prettier": "3.2.5",
     "semantic-release-plugin-update-version-in-files": "^1.0.0",
-    "ts-jest": "^29.0.0",
-    "typescript": "^5.0.0"
+    "ts-jest": "^29.1.0",
+    "typescript": "^5.3.0"
   },
   "jest": {
+    "extensionsToTreatAsEsm": [
+      ".ts"
+    ],
     "transform": {
       "^.+\\.(ts|tsx)$": [
         "ts-jest",
         {
-          "tsconfig": "test/tsconfig.test.json"
+          "tsconfig": "test/tsconfig.test.json",
+          "useESM": true
         }
       ]
     },
@@ -61,6 +64,9 @@
         "functions": 100,
         "lines": 100
       }
+    },
+    "moduleNameMapper": {
+      "^(.+)\\.jsx?$": "$1"
     }
   },
   "release": {
