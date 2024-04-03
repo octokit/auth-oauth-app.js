@@ -1,7 +1,8 @@
 {
   "name": "@octokit/auth-oauth-app",
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "provenance": true
   },
   "version": "0.0.0-development",
   "description": "GitHub OAuth App authentication for JavaScript",
