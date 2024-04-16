@@ -8,6 +8,9 @@ const sharedOptions = {
   minify: false,
   allowOverwrite: true,
   packages: "external",
+  platform: "neutral",
+  format: "esm",
+  target: "es2022",
 };
 
 async function main() {
@@ -18,8 +21,6 @@ async function main() {
     entryPoints: await glob(["./src/*.ts", "./src/**/*.ts"]),
     outdir: "pkg/dist-src",
     bundle: false,
-    platform: "neutral",
-    format: "esm",
     ...sharedOptions,
     sourcemap: false,
   });
@@ -35,27 +36,12 @@ async function main() {
 
   const entryPoints = ["./pkg/dist-src/index.js"];
 
-  await Promise.all([
-    // Build the a CJS Node.js bundle
-    esbuild.build({
-      entryPoints,
-      outdir: "pkg/dist-node",
-      bundle: true,
-      platform: "node",
-      target: "node18",
-      format: "esm",
-      ...sharedOptions,
-    }),
-    // Build an ESM browser bundle
-    esbuild.build({
-      entryPoints,
-      outdir: "pkg/dist-web",
-      bundle: true,
-      platform: "browser",
-      format: "esm",
-      ...sharedOptions,
-    }),
-  ]);
+  await esbuild.build({
+    entryPoints,
+    outdir: "pkg/dist-bundle",
+    bundle: true,
+    ...sharedOptions,
+  });
 
   // Copy the README, LICENSE to the pkg folder
   await copyFile("LICENSE", "pkg/LICENSE");
@@ -74,22 +60,13 @@ async function main() {
       {
         ...pkg,
         files: ["dist-*/**", "bin/**"],
-        main: "./dist-node/index.js",
         types: "./dist-types/index.d.ts",
         exports: {
           ".": {
-            node: {
-              types: "./dist-types/index.d.ts",
-              import: "./dist-node/index.js",
-            },
-            browser: {
-              types: "./dist-types/web.d.ts",
-              import: "./dist-web/index.js",
-            },
-            default: {
-              types: "./dist-types/index.d.ts",
-              import: "./dist-node/index.js",
-            },
+            types: "./dist-types/index.d.ts",
+            import: "./dist-bundle/index.js",
+            // Tooling currently are having issues with the "exports" field when there is no "default", ex: TypeScript, eslint
+            default: "./dist-bundle/index.js",
           },
         },
         sideEffects: false,
