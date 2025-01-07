@@ -6,8 +6,8 @@ import type {
   OctokitResponse,
 } from "@octokit/types";
 
-import * as AuthOAuthUser from "@octokit/auth-oauth-user";
-import * as DeviceTypes from "@octokit/auth-oauth-device";
+import type * as AuthOAuthUser from "@octokit/auth-oauth-user";
+import type * as DeviceTypes from "@octokit/auth-oauth-device";
 
 export type ClientType = "oauth-app" | "github-app";
 

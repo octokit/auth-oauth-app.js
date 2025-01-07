@@ -40,7 +40,7 @@ export async function hook(
   try {
     return await request(endpoint);
   } catch (error: any) {
-    /* istanbul ignore if */
+    /* v8 ignore next */
     if (error.status !== 401) throw error;
 
     error.message = `[@octokit/auth-oauth-app] "${endpoint.method} ${endpoint.url}" does not support clientId/clientSecret basic authentication.`;
