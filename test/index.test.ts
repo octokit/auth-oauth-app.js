@@ -1,7 +1,7 @@
-import fetchMock, { type MockMatcherFunction } from "fetch-mock";
+import { test, expect, vi } from "vitest";
+import fetchMock from "fetch-mock";
 import { request } from "@octokit/request";
 import { Octokit } from "@octokit/core";
-import { jest } from "@jest/globals";
 
 import { createOAuthAppAuth, createOAuthUserAuth } from "../src/index.js";
 
@@ -88,7 +88,7 @@ test("README device flow example", async () => {
         user_code: "usercode123",
         verification_uri: "https://github.com/login/device",
         expires_in: 900,
-        // use low number because jest.useFakeTimers() & jest.runAllTimers() didn't work for me
+        // use low number because vi.useFakeTimers() & vi.runAllTimers() didn't work for me
         interval: 0.005,
       },
       {
@@ -138,7 +138,7 @@ test("README device flow example", async () => {
     }),
   });
 
-  const onVerification = jest.fn();
+  const onVerification = vi.fn();
   const authentication = await auth({
     type: "oauth-user",
     onVerification,
@@ -174,7 +174,7 @@ test("device flow with scopes", async () => {
         user_code: "usercode123",
         verification_uri: "https://github.com/login/device",
         expires_in: 900,
-        // use low number because jest.useFakeTimers() & jest.runAllTimers() didn't work for me
+        // use low number because vi.useFakeTimers() & vi.runAllTimers() didn't work for me
         interval: 0.005,
       },
       {
@@ -224,7 +224,7 @@ test("device flow with scopes", async () => {
     }),
   });
 
-  const onVerification = jest.fn();
+  const onVerification = vi.fn();
   const authentication = await auth({
     type: "oauth-user",
     scopes: ["repo", "gist"],
@@ -251,7 +251,7 @@ test("device flow with scopes", async () => {
 });
 
 test("README Octokit usage example", async () => {
-  const matchGetUserRequest: MockMatcherFunction = (url, options) => {
+  const matchGetUserRequest: fetchMock.MockMatcherFunction = (url, options) => {
     expect(url).toEqual("https://api.github.com/user");
     expect(options.headers).toEqual(
       expect.objectContaining({
