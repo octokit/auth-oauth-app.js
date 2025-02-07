@@ -27,7 +27,7 @@ test("README example with {type: 'oauth-app'}", async () => {
 });
 
 test("README web flow example", async () => {
-  const mock = fetchMock.sandbox().postOnce(
+  const mock = fetchMock.createInstance().postOnce(
     "https://github.com/login/oauth/access_token",
     {
       access_token: "secret123",
@@ -56,7 +56,7 @@ test("README web flow example", async () => {
         "user-agent": "test",
       },
       request: {
-        fetch: mock,
+        fetch: mock.fetchHandler,
       },
     }),
   });
@@ -79,7 +79,7 @@ test("README web flow example", async () => {
 
 test("README device flow example", async () => {
   const mock = fetchMock
-    .sandbox()
+    .createInstance()
 
     .postOnce(
       "https://github.com/login/device/code",
@@ -120,7 +120,6 @@ test("README device flow example", async () => {
           device_code: "devicecode123",
           grant_type: "urn:ietf:params:oauth:grant-type:device_code",
         },
-        overwriteRoutes: false,
       },
     );
 
@@ -133,7 +132,7 @@ test("README device flow example", async () => {
         "user-agent": "test",
       },
       request: {
-        fetch: mock,
+        fetch: mock.fetchHandler,
       },
     }),
   });
@@ -165,7 +164,7 @@ test("README device flow example", async () => {
 
 test("device flow with scopes", async () => {
   const mock = fetchMock
-    .sandbox()
+    .createInstance()
 
     .postOnce(
       "https://github.com/login/device/code",
@@ -206,7 +205,6 @@ test("device flow with scopes", async () => {
           device_code: "devicecode123",
           grant_type: "urn:ietf:params:oauth:grant-type:device_code",
         },
-        overwriteRoutes: false,
       },
     );
 
@@ -219,7 +217,7 @@ test("device flow with scopes", async () => {
         "user-agent": "test",
       },
       request: {
-        fetch: mock,
+        fetch: mock.fetchHandler,
       },
     }),
   });
@@ -251,20 +249,8 @@ test("device flow with scopes", async () => {
 });
 
 test("README Octokit usage example", async () => {
-  const matchGetUserRequest: fetchMock.MockMatcherFunction = (url, options) => {
-    expect(url).toEqual("https://api.github.com/user");
-    expect(options.headers).toEqual(
-      expect.objectContaining({
-        accept: "application/vnd.github.v3+json",
-        authorization: "token token123",
-      }),
-    );
-
-    return true;
-  };
-
   const mock = fetchMock
-    .sandbox()
+    .createInstance()
 
     .postOnce(
       "https://api.github.com/applications/1234567890abcdef1234/token",
@@ -291,9 +277,22 @@ test("README Octokit usage example", async () => {
       },
     )
 
-    .getOnce(matchGetUserRequest, {
-      login: "octocat",
-    });
+    .getOnce(
+      ({ url, options }) => {
+        expect(url).toEqual("https://api.github.com/user");
+        expect(options.headers).toEqual(
+          expect.objectContaining({
+            accept: "application/vnd.github.v3+json",
+            authorization: "token token123",
+          }),
+        );
+
+        return true;
+      },
+      {
+        login: "octocat",
+      },
+    );
 
   const appOctokit = new Octokit({
     authStrategy: createOAuthAppAuth,
@@ -303,7 +302,7 @@ test("README Octokit usage example", async () => {
     },
     userAgent: "test",
     request: {
-      fetch: mock,
+      fetch: mock.fetchHandler,
     },
   });
 
@@ -327,7 +326,7 @@ test("README Octokit usage example", async () => {
         auth: options,
         userAgent: "test",
         request: {
-          fetch: mock,
+          fetch: mock.fetchHandler,
         },
       });
     },
@@ -342,7 +341,7 @@ test("README Octokit usage example", async () => {
 });
 
 test("GitHub App", async () => {
-  const mock = fetchMock.sandbox().postOnce(
+  const mock = fetchMock.createInstance().postOnce(
     "https://github.com/login/oauth/access_token",
     {
       access_token: "secret123",
@@ -372,7 +371,7 @@ test("GitHub App", async () => {
         "user-agent": "test",
       },
       request: {
-        fetch: mock,
+        fetch: mock.fetchHandler,
       },
     }),
   });
@@ -394,7 +393,7 @@ test("GitHub App", async () => {
 });
 
 test("`factory` auth option", async () => {
-  const mock = fetchMock.sandbox().postOnce(
+  const mock = fetchMock.createInstance().postOnce(
     "https://github.com/login/oauth/access_token",
     {
       access_token: "secret123",
@@ -424,7 +423,7 @@ test("`factory` auth option", async () => {
         "user-agent": "test",
       },
       request: {
-        fetch: mock,
+        fetch: mock.fetchHandler,
       },
     }),
   });
@@ -449,7 +448,7 @@ test("`factory` auth option", async () => {
 });
 
 test("request with custom baseUrl (GHE)", async () => {
-  const mock = fetchMock.sandbox().postOnce(
+  const mock = fetchMock.createInstance().postOnce(
     "https://github.acme-inc.com/login/oauth/access_token",
     {
       access_token: "secret123",
@@ -479,7 +478,7 @@ test("request with custom baseUrl (GHE)", async () => {
         "user-agent": "test",
       },
       request: {
-        fetch: mock,
+        fetch: mock.fetchHandler,
       },
     }),
   });
@@ -503,7 +502,7 @@ test("request with custom baseUrl (GHE)", async () => {
 });
 
 test("auth.hook with custom baseUrl (GHE)", async () => {
-  const mock = fetchMock.sandbox().postOnce(
+  const mock = fetchMock.createInstance().postOnce(
     "https://github.acme-inc.com/api/v3/applications/123/token",
     { ok: true },
     {
@@ -521,7 +520,7 @@ test("auth.hook with custom baseUrl (GHE)", async () => {
   const requestWithMock = request.defaults({
     baseUrl: "https://github.acme-inc.com/api/v3",
     request: {
-      fetch: mock,
+      fetch: mock.fetchHandler,
       hook: auth.hook,
     },
   });
@@ -542,7 +541,7 @@ test("auth.hook with custom baseUrl (GHE)", async () => {
 
 test("auth.hook(request, 'POST https://github.com/login/oauth/access_token') does not send request twice (#35)", async () => {
   const mock = fetchMock
-    .sandbox()
+    .createInstance()
     .postOnce("https://github.com/login/oauth/access_token", {
       access_token: "secret123",
       scope: "",
@@ -555,7 +554,7 @@ test("auth.hook(request, 'POST https://github.com/login/oauth/access_token') doe
 
   const requestWithAuth = request.defaults({
     request: {
-      fetch: mock,
+      fetch: mock.fetchHandler,
       hook: auth.hook,
     },
   });
@@ -572,7 +571,7 @@ test("auth.hook(request, 'POST https://github.com/login/oauth/access_token') doe
 
 test("auth.hook(request, 'POST /applications/{client_id}/token') checks token", async () => {
   const mock = fetchMock
-    .sandbox()
+    .createInstance()
     .postOnce("https://github.com/login/oauth/access_token", {
       access_token: "secret123",
       scope: "",
@@ -596,7 +595,7 @@ test("auth.hook(request, 'POST /applications/{client_id}/token') checks token", 
 
   const requestWithAuth = request.defaults({
     request: {
-      fetch: mock,
+      fetch: mock.fetchHandler,
       hook: auth.hook,
     },
   });
@@ -613,9 +612,11 @@ test("auth.hook(request, 'POST /applications/{client_id}/token') checks token", 
 });
 
 test("auth.hook(request, 'GET /user)", async () => {
-  const mock = fetchMock.sandbox().getOnce("https://api.github.com/user", {
-    status: 401,
-  });
+  const mock = fetchMock
+    .createInstance()
+    .getOnce("https://api.github.com/user", {
+      status: 401,
+    });
 
   const auth = createOAuthAppAuth({
     clientId: "12345678901234567890",
@@ -624,7 +625,7 @@ test("auth.hook(request, 'GET /user)", async () => {
 
   const requestWithAuth = request.defaults({
     request: {
-      fetch: mock,
+      fetch: mock.fetchHandler,
       hook: auth.hook,
     },
   });
@@ -636,7 +637,7 @@ test("auth.hook(request, 'GET /user)", async () => {
 
 test("auth.hook(request, 'GET /repos/{owner}/{repo})", async () => {
   const mock = fetchMock
-    .sandbox()
+    .createInstance()
     .getOnce("https://api.github.com/repos/octokit/octokit.js", {
       ok: true,
     });
@@ -648,7 +649,7 @@ test("auth.hook(request, 'GET /repos/{owner}/{repo})", async () => {
 
   const requestWithAuth = request.defaults({
     request: {
-      fetch: mock,
+      fetch: mock.fetchHandler,
       hook: auth.hook,
     },
   });
@@ -662,7 +663,7 @@ test("auth.hook(request, 'GET /repos/{owner}/{repo})", async () => {
 
 test("auth.hook(request, 'GET /repos/{owner}/{repo}) as GitHub App", async () => {
   const mock = fetchMock
-    .sandbox()
+    .createInstance()
     .getOnce("https://api.github.com/repos/octokit/octokit.js", {
       ok: true,
     });
@@ -675,7 +676,7 @@ test("auth.hook(request, 'GET /repos/{owner}/{repo}) as GitHub App", async () =>
 
   const requestWithAuth = request.defaults({
     request: {
-      fetch: mock,
+      fetch: mock.fetchHandler,
       hook: auth.hook,
     },
   });
