@@ -25,14 +25,14 @@
   "author": "Gregor Martynus (https://github.com/gr2m)",
   "license": "MIT",
   "dependencies": {
-    "@octokit/auth-oauth-device": "^8.0.3",
-    "@octokit/auth-oauth-user": "^6.0.2",
-    "@octokit/request": "^10.0.6",
-    "@octokit/types": "^16.0.0",
+    "@octokit/auth-oauth-device": "^8.0.4",
+    "@octokit/auth-oauth-user": "^6.0.3",
+    "@octokit/request": "^10.0.13",
+    "@octokit/types": "^17.0.0",
     "universal-user-agent": "^7.0.0"
   },
   "devDependencies": {
-    "@octokit/core": "^7.0.6",
+    "@octokit/core": "^7.0.7",
     "@octokit/tsconfig": "^4.0.0",
     "@types/node": "^24.0.0",
     "@vitest/coverage-v8": "^4.0.0",
